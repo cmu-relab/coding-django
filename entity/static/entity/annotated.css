@@ -1,0 +1,29 @@
+body {
+    font-size: 10pt;
+    line-height: 1.4;
+}
+span.coded_i {
+    background-color: #99ccff;
+    padding: 4px;
+}
+span.selected {
+    background-color: #6699cc;
+    padding: 4px;
+}
+span.coded_i_new {
+    background-color: #ff9999;
+    padding: 4px;
+}
+span.coded_i_new selected {
+    background-color: #ff99ff;
+    padding: 4px;
+}
+span {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}

@@ -1,0 +1,21 @@
+Items,Rater 1, Rater 2, Rater 3, Rater 4
+1,S,I,S,I
+2,I,I,S,I
+3,N,N,I,N
+4,N,N,N,N
+5,S,S,S,I
+6,N,N,N,I
+7,N.N,I,N
+8,N,N,N,N
+9,S,S,I,S
+10,S,S,S,S
+11,I,I,S,I
+12,I,S,S,S
+13,S,I,I,I
+14,N,I,I,N
+15,I,I,N,N
+16,I,N,N,I
+17,S,S,S,S
+18,S,I,S,S
+19,I,S,S,S
+20,N,N,I,N

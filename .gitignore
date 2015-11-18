@@ -1,0 +1,14 @@
+
+*.pyc
+
+lang/settings.py
+
+db.sqlite3
+
+entity/java/*
+
+venv/*
+
+static/admin
+
+admin.py

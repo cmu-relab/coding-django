@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>Present draggable entities in annotated text</title>
+    <meta charset="UTF-8">
+    <script type='text/javascript' src='/static/entity/shared.js'></script>
+    <script type='text/javascript' src='/static/entity/annotated.js'></script>
+    <script type='text/javascript' src='/static/entity/annotator.js'></script>
+    <link rel='stylesheet' type='text/css' href='/static/entity/annotated.css'>
+  </head>
+  <body onload="enableDraggableSpans(); enableSelectable()">
+
+    <div id="text0">This is a paragraph with <span class="coded_i" alt="information">an information</span> type, such as <span class="coded_i" alt="name">name,</span> <span class="coded_i" alt="postal address">address</span> and <span class="coded_i" alt="telephone number,zip code">phone number or zip code</span>.</div>
+
+    <div id="text1"><p>There are three use cases:
+      <ol>
+	<li>An analyst drags an information type onto another type in the text or sidebar.</li>
+	<li>An analyst clicks more than one type, which changes the type to a selected color, and then they drag the selected set onto another type in the text or sidebar</li>
+      </ol>
+    </div>
+  </body>
+</html>

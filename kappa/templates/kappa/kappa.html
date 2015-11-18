@@ -1,0 +1,45 @@
+{% extends "kappa/base.html" %}
+
+{% block title %}Inter-rater Reliability{% endblock %}
+
+{% block content %}
+
+<table align="center" width="600">
+  <tr>
+    <td>
+
+      <h1>Inter-rater Reliability for Nominal Ratings</h1>
+
+      <form action="analyze" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+
+	<p>Inter-rater reliability, or inter-rater agreement, is the degree of agreement among raters about the ratings assigned to items. This website allows you to compute one or more statistics, assuming your data is nominal or categorical and formatted to our <a href="input.html">input file format</a>.</p>
+
+	<p>Input File #1: <input type="file" name="datafile1" /></p>
+
+	<hr />
+
+	<p>If you want to compare agreement between two groups, upload a second input file below for the second group, otherwise, click "Analyze" to continue.</p>
+
+	<p>Input File #2: <input type="file" name="datafile2" /></p>
+      
+	<div align=right>
+	  <input type="submit" value="Analyze" />
+	</div>
+
+      </form>
+
+      <hr />
+
+      <p>The following statistics are computed for nominal or categorical data to measure the degree of agreement above chance. Each statistic has it's own assumptions, which the investigator is responsible for checking against the input file.</p>
+    
+      <p><b>Cohen's Kappa co-efficient</b>, or the <em>observed proportion of agreement index</em> (Cohen, 1960) is a chance-corrected statistic for measuring agreement between two raters on a nominal scale.</p>
+
+      <p><b>Fleiss' Kappa co-efficient</b>, or intraclass correlation coefficient (Fleiss, 1971) is a chance-corrected measure of agreement between two or more raters on a nominal scale.</p>
+
+      <p><b>Vanbelle's Kappa co-efficient</b>, or two group agreement index (Vanbelle & Albert, 2009) is a chance-corrected measure of agreement between two groups of raters. This measure is useful when comparing, for example, raters with different demographics, education or experience.</p>
+
+    </td>
+  </tr>
+</table>
+{% endblock %}

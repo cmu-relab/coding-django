@@ -1,0 +1,173 @@
+<html>
+  <head>
+    <title>Classify entities into ontology</title>
+    <meta charset="UTF-8">
+    <script type='text/javascript' src='/static/entity/shared.js'></script>
+    <script type='text/javascript'>
+      function allowDropOnto(ev) {
+	  ev.preventDefault();
+      }
+      
+      function dragOnto(ev) {
+	  ev.dataTransfer.setData("text", "!" + ev.target.parentElement.id);
+	  //console.log("Dragging: ", ev.target.parentElement.id);
+      }
+      
+      function dropOnto(ev) {
+	  ev.preventDefault();
+	  var targetDiv = document.getElementById(ev.target.parentElement.id);
+	  var sourceId = ev.dataTransfer.getData("text");
+	  var sourceDiv;
+	
+	  if (sourceId.startsWith("!")) {
+	      sourceDiv = document.getElementById(sourceId.substring(1));
+	      insertEntity(targetDiv, sourceDiv);
+	  }
+	  else {
+	      var iframe = document.getElementById("iftext");
+	      var sourceSpan = iframe.contentDocument.getElementById(sourceId);
+	      var names = sourceSpan.getAttribute("alt").split(",");
+	      for (var i=0; i<names.length; i++) {
+		  var sourceDiv = createEntity(names[i]);
+		  insertEntity(targetDiv, sourceDiv);
+	      }
+	  }
+      }
+
+      function initOntology() {
+	  var div = document.getElementById("ontology");
+	  var entity = createEntity("top");
+	  insertEntity(div, entity);
+      }
+
+      function initOntologyEntities(lhs, rhs) {
+	  // begin by finding the existing entities
+	  var lhsDiv, rhsDiv;
+	  if (lhs != null && lhs != "") {
+	      lhsDiv = document.getElementById(lhs);
+
+              // if no lhsDiv, then add to top
+	      if (lhsDiv == null) {
+		  var top = document.getElementById("top");
+		  lhsDiv = createEntity(lhs);
+		  insertEntity(top, lhsDiv);
+	      }
+	  }
+	  if (rhs != null && rhs != "") {
+	      rhsDiv = document.getElementById(rhs);
+	      if (rhsDiv == null) {
+		  rhsDiv = createEntity(rhs);
+	      }
+	  }
+	  
+	  if (lhsDiv != null && rhsDiv != null) {
+	      insertEntity(lhsDiv, rhsDiv);
+	  }
+      }
+
+      function formatElementList() {
+	  var input = document.getElementById("items");
+	  var top = document.getElementById("top");
+	  var value = "";
+	  for (var i=0; i<top.children.length; i++) {
+	      if (top.children[i].className == "entity") {
+		  value += formatElement(top.children[i]);
+	      }
+	  }
+	  input.value = value;
+	  document.getElementById("download").submit();
+      }
+
+      function formatElement(elem) {
+	  var value = "";
+	  for (var i=0; i<elem.children.length; i++) {
+	      if (elem.children[i].className == "entity") {
+		  value += elem.id + "," + elem.children[i].id + ";";
+		  value += formatElement(elem.children[i]);
+	      }
+	  }
+	  return value;
+      }
+
+      function setAnnotated() {
+	  select = document.getElementById("select_annotated");
+	  html = select.options[select.selectedIndex].value;
+	  iframe = document.getElementById("iftext");
+	  iframe.src = "annotated?html=" + html;
+      }
+    </script>
+  </head>
+  <body>
+    <style type="text/css">
+      body {
+	  font-size: 10pt;
+      }
+      div#ontology {
+	  margin: 10px;
+	  width: 400px
+	  height: 100%;
+	  float: left;
+      }
+      div.entity {
+	  margin-left: 10px;
+	  padding: 1px;
+	  width: 100%;
+	  -webkit-touch-callout: none;
+	  -webkit-user-select: none;
+	  -khtml-user-select: none;
+	  -moz-user-select: none;
+	  -ms-user-select: none;
+	  user-select: none;
+	  cursor: default;
+      }
+      div.branch {
+	  border-left: solid black 1px;
+	  border-bottom: solid black 1px;
+	  float:left;
+	  margin-right: 5px;
+	  height: 9px;
+	  width: 10px;
+      }
+      iframe {
+	  overflow: scroll;
+	  width: 400px;
+	  height: 100%;
+	  border: 1px solid black;
+	  float: left;
+	  margin-right: 10px
+      }
+    </style>
+
+  <iframe id="iftext" src="annotated?html={{html}}"></iframe>
+
+  <form>
+    <select id="select_annotated" name="html">
+      {% for file in files %}
+      <option>{{file}}</option>
+      {% endfor %}
+    </select>
+    <input type="button" value="Read" onclick="setAnnotated()" />
+  </form>
+
+  <form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    Import Ontology: <input type="file" name="upload" size="32" />
+    <input type="submit" value="Upload" />
+  </form>
+
+  <form id="download" action="download" method="POST">
+    {% csrf_token %}
+    Export Ontology <input type="button" value="Download" onclick="formatElementList()" />
+    <input id="items" type="hidden" name="items" value="" />
+  </form>
+
+  <div id="ontology"></div>
+  <script type="text/javascript">
+    initOntology();
+    {% for lhs, rhs in items %}
+    initOntologyEntities('{{lhs}}', '{{rhs}}');
+
+    {% endfor %}
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{% extends "kappa/base.html" %}
+
+{% block title %}Input File Format{% endblock %}
+
+{% block content %}
+
+<table align="center" width="600">
+  <tr>
+    <td>
+    <h1>Inter-rater Reliability Input File Format</h1>
+
+
+    <p>The input data for computing inter-rater reliability on nominal ratings must be presented as a comma-separated values (CSV) formatted file: the first or header row must be your rater labels or names, the first column must be the item labels or names, and then each cell <i>X</i>, <i>Y</i> for row <i>X</i> &ge; 1 and column <i>Y</i> &ge; 1 must be the rating or code provided by rater <i>X</i> for item <i>Y</i>.
+
+    <p>For example, the HTML version of an example table might look something like this for five raters, three items numbered 1-3 and the codes A, B, C and D:
+    </p>
+
+<table align="center" class="panel" width="600">
+  <tr>
+    <td>&nbsp</td>
+    <td align="center">Rater 1</td>
+    <td align="center">Rater 2</td>
+    <td align="center">Rater 3</td>
+    <td align="center">Rater 4</td>
+    <td align="center">Rater 5</td>
+  </tr>
+  <tr>
+    <td align="center">1</td>
+    <td align="center">A</td>
+    <td align="center">A</td>
+    <td align="center">B</td>
+    <td align="center">C</td>
+    <td align="center">A</td>
+  </tr>
+  <tr>
+    <td align="center">2</td>
+    <td align="center">C</td>
+    <td align="center">B</td>
+    <td align="center">C</td>
+    <td align="center">C</td>
+    <td align="center">C</td>
+  </tr>
+  <tr>
+    <td align="center">3</td>
+    <td align="center">D</td>
+    <td align="center">D</td>
+    <td align="center">D</td>
+    <td align="center">D</td>
+    <td align="center">A</td>
+  </tr>
+</table>
+
+    <p>To generate a blank input file, select the number of raters and items below and you will be prompted to download the file.<p>
+
+      <form action="newinput" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	Number of Items <input type="textbox" name="items" value="3" />,
+	Number of Raters <input type="textbox" name="raters" value="5" />
+	<input type="submit" value="Download" />
+      </form>
+
+    </td>
+  </tr>
+<table>
+{% endblock %}

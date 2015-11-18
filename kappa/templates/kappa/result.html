@@ -1,0 +1,97 @@
+{% extends "kappa/base.html" %}
+
+{% block title %}Agreement Analysis{% endblock %}
+
+{% block content %}
+
+<table align="center" width="600">
+  <tr>
+    <td><font size="+1">Inter-rater Reliability Statistics</font></td>
+  </tr>
+</table>
+
+<table align="center" class="panel" width="600">
+  <tr>
+    <td align="right" class="heading" width="150">Input File #1:</td>
+    <td>{{ filename1 }}</td>
+  </tr>
+  {% if ckappa1 != "-1" %}
+  <tr>
+    <td align="right" class="heading">Cohen's<sup>1</sup> Kappa:</td>
+    <td>{{ ckappa1 }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td align="right" class="heading">Fleiss' Kappa:</td>
+    <td>{{ fkappa1 }}</td>
+  </tr>
+  <tr>
+    <td align="right" class="heading">Items:</td>
+    <td>{{ items1 | length }}</td>
+  </tr>
+  <tr>
+    <td align="right" class="heading">Raters:</td>
+    <td>{{ raters1 | length }}</td>
+  </tr>
+  <tr>
+    <td align="right" class="heading">Codes:</td>
+    <td>{{ codes1 }}</td>
+  </tr>
+</table>
+
+{% if filename2 != "" %}
+<br />
+<table align="center" class="panel" width="600">
+  <tr>
+    <td align="right" class="heading" width="150">Input File #2:</td>
+    <td>{{ filename2 }}</td>
+  </tr>
+  {% if ckappa2 != "-1" %}
+  <tr>
+    <td align="right" class="heading">Cohen's<sup>1</sup> Kappa:</td>
+    <td>{{ ckappa2 }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td align="right" class="heading">Fleiss' Kappa:</td>
+    <td>{{ fkappa2 }}</td>
+  </tr>
+  <tr>
+    <td align="right" class="heading">Items:</td>
+    <td>{{ items2 | length }}</td>
+  </tr>
+  <tr>
+    <td align="right" class="heading">Raters:</td>
+    <td>{{ raters2 | length }}</td>
+  </tr>
+  <tr>
+    <td align="right" class="heading">Codes:</td>
+    <td>{{ codes2 }}</td>
+  </tr>
+</table>
+
+<br />
+<table align="center" class="panel" width="600">
+  <tr>
+    <td align="right" class="heading" width="150">Vanbelle's<sup>2</sup> Kappa:</td>
+    <td>{{ vkappa }}</td>
+  </tr>
+</table>
+
+{% endif %}
+
+<br />
+<table align="center" width="600">
+  <tr>
+    <td>
+{% if ckappa1 != "-1" or ckappa2 != "-1" %}
+    <sup>1</sup> Cohen's Kappa is only computed when the datasets have exactly 2 raters.<br>
+{% endif %}
+{% if vkappa != "-1" %}
+    <sup>2</sup> Vanbelle's Kappa is only computed when both datasets have the same number of items.
+{% endif %}
+    </td>
+  </tr>
+</table>
+
+{% endblock %}
