@@ -6,7 +6,7 @@ span.coded_i {
     background-color: #99ccff;
     padding: 4px;
 }
-span.selected {
+span.coded_i.selected {
     background-color: #6699cc;
     padding: 4px;
 }
@@ -14,8 +14,8 @@ span.coded_i_new {
     background-color: #ff9999;
     padding: 4px;
 }
-span.coded_i_new selected {
-    background-color: #ff99ff;
+span.coded_i_new.selected {
+    background-color: #cc6666;
     padding: 4px;
 }
 span {

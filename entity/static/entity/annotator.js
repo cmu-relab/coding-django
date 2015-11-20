@@ -24,9 +24,23 @@ function select_text(e, div) {
     var obj = window.event ? event : e;
     var unicode = obj.charCode ? obj.charCode : obj.keyCode;
     var key = String.fromCharCode(unicode).toLowerCase();
-            
-    // set the color code for the span.
-    var color = "";
+
+    // delete the selected span
+    if (key == 'd') {
+	var span = document.getElementsByTagName('span');
+	for (var i=0; i<span.length; i++) {
+	    console.log("span: ", span[i].getAttribute("class"));
+	    if (span[i].getAttribute("class") == null
+		|| !span[i].getAttribute("class").match('selected')) {
+		continue;
+	    }
+	    var text = document.createTextNode(span[i].innerHTML);
+	    span[i].parentNode.replaceChild(text, span[i]);
+	}
+	return;
+    }
+    
+    // else, check for new selection.
     if (key != 's') {
         return;
     }
