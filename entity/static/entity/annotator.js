@@ -140,7 +140,7 @@ function select_text(e, div) {
 	span.setAttribute("alt", span.innerHTML);
 
 	// enable draggableness for ontology
-	enableDraggableSpan(span, 't');
+	enableDraggableSpan(span);
     }
 }
         
