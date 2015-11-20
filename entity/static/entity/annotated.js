@@ -28,12 +28,15 @@ function dropSpan(ev) {
     
     // find target div, create if none exists
     var top = window.parent.document.getElementById("top");
-    var targetName = ev.target.getAttribute("alt");
-    var targetDiv = window.parent.document.getElementById(targetName);
-    if (targetDiv == null) {
-	targetDiv = createEntity(targetName);
-	//console.log("Created target: ", targetName);
-	insertEntity(top, targetDiv);
+    var targetName = ev.target.getAttribute("alt").split(",");
+    var targetDiv = [];
+    for (var i=0; i<targetName.length; i++) {
+	targetDiv[i] = window.parent.document.getElementById(targetName[i]);
+	if (targetDiv[i] == null) {
+	    targetDiv[i] = createEntity(targetName[i]);
+	    //console.log("Created target: ", targetName);
+	    insertEntity(top, targetDiv[i]);
+	}
     }
     
     // find source divs or create, if none exists
@@ -51,14 +54,18 @@ function dropSpan(ev) {
 	sourceSpan.className = sourceSpan.className.replace("selected ", "");
     }
     for (var i=0; i<sourceName.length; i++) {
-	if (targetName == sourceName[i]) {
-	    continue;
+	
+	for (var j=0; j<targetName.length; j++) {
+	    if (targetName[j] == sourceName[i]) {
+		continue;
+	    }
+	    var sourceDiv = createEntity(sourceName[i]);
+	    //console.log("Created source: ", sourceName[i]);
+
+	    insertEntity(targetDiv[j], sourceDiv);
+	    //console.log("Linked source to target: ", targetName[j]);
 	}
-	var sourceDiv = createEntity(sourceName[i]);
-	//console.log("Created source: ", sourceName[i]);
-	insertEntity(targetDiv, sourceDiv);
-	//console.log("Linked source to target: ", targetName);
-        
+	
 	// remove source div from top-level, if exists
 	for (var j=0; j<top.children; j++) {
 	    var id = top.children[i].id;
