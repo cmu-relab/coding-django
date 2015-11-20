@@ -47,11 +47,3 @@ function insertEntity(parentDiv, childDiv) {
     return parentDiv.children[parentDiv.children.length - 1];
 }
 
-function selectEntity(div) {
-    if (div.className.indexOf("selected ") < 0) {
-	div.className = "selected " + div.className;
-    }
-    else {
-	div.className = div.className.replace("selected ", "");
-    }
-}

@@ -38,8 +38,13 @@
 	  var div = document.getElementById("ontology");
 	  var entity = createEntity("top");
 	  insertEntity(div, entity);
-      }
 
+	  // activate key listener
+	  div.setAttribute("onkeypress", "modifyOntology(event,this)");
+	  div.setAttribute("tabindex", 1);
+	  div.style.cursor = "default";
+      }
+      
       function initOntologyEntities(lhs, rhs) {
 	  // begin by finding the existing entities
 	  var lhsDiv, rhsDiv;
@@ -62,6 +67,36 @@
 	  
 	  if (lhsDiv != null && rhsDiv != null) {
 	      insertEntity(lhsDiv, rhsDiv);
+	  }
+      }
+
+      function selectEntity(div) {
+	  if (div.className.indexOf("selected ") < 0) {
+	      div.className = "selected " + div.className;
+	  }
+	  else {
+	      div.className = div.className.replace("selected ", "");
+	  }
+      }
+
+      function modifyOntology(e, onto) {
+	  // translate the key event to the key code
+	  var obj = window.event ? event : e;
+	  var unicode = obj.charCode ? obj.charCode : obj.keyCode;
+	  var key = String.fromCharCode(unicode).toLowerCase();
+
+	  if (key != 'd') {
+	      return;
+	  }
+
+	  // delete selected entities
+	  var div = onto.getElementsByTagName("div");
+	  for (var i=0; i<div.length; i++) {
+	      if (div[i].className.indexOf("selected ") < 0) {
+		  continue;
+	      }
+	      var container = div[i].parentElement;
+	      container.parentElement.removeChild(container);
 	  }
       }
 
