@@ -29,7 +29,6 @@ function select_text(e, div) {
     if (key == 'd') {
 	var span = document.getElementsByTagName('span');
 	for (var i=0; i<span.length; i++) {
-	    console.log("span: ", span[i].getAttribute("class"));
 	    if (span[i].getAttribute("class") == null
 		|| !span[i].getAttribute("class").match('selected')) {
 		continue;

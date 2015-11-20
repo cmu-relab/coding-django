@@ -109,9 +109,11 @@
 	  float: left;
       }
       div.entity {
+	  margin: auto;
 	  margin-left: 10px;
 	  padding: 1px;
 	  width: 100%;
+	  clear: both;
 	  -webkit-touch-callout: none;
 	  -webkit-user-select: none;
 	  -khtml-user-select: none;
@@ -120,11 +122,18 @@
 	  user-select: none;
 	  cursor: default;
       }
+      div.label {
+	  padding: 2px;
+	  float: left;
+      }
+      div.label.selected {
+	  background-color: #ff99ff;
+      }
       div.branch {
 	  border-left: solid black 1px;
 	  border-bottom: solid black 1px;
-	  float:left;
 	  margin-right: 5px;
+	  float: left;
 	  height: 9px;
 	  width: 10px;
       }

@@ -18,6 +18,7 @@ function createEntity(name) {
     label.setAttribute("ondrop", "dropOnto(event)");
     label.setAttribute("ondragover", "allowDropOnto(event)");
     label.setAttribute("draggable", "true");
+    label.setAttribute("class", "label");
     label.setAttribute("onclick", "selectEntity(this)");
     label.appendChild(document.createTextNode(name));
     div.appendChild(label);
@@ -44,4 +45,13 @@ function insertEntity(parentDiv, childDiv) {
     // else the entity is inserted as the last element
     parentDiv.appendChild(childDiv);
     return parentDiv.children[parentDiv.children.length - 1];
+}
+
+function selectEntity(div) {
+    if (div.className.indexOf("selected ") < 0) {
+	div.className = "selected " + div.className;
+    }
+    else {
+	div.className = div.className.replace("selected ", "");
+    }
 }
