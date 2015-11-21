@@ -82,6 +82,9 @@
 	      if (div[i].className.indexOf("selected ") < 0) {
 		  continue;
 	      }
+	      if (div[i].innerHTML == "top") {
+		  continue;
+	      }
 	      var container = div[i].parentElement;
 	      container.parentElement.removeChild(container);
 	  }
@@ -98,6 +101,9 @@
   </head>
   <body>
     <style type="text/css">
+      body {
+	font-size: 10pt;
+      }
       div#ontology {
 	font-size: 10pt;
 	margin: 10px;
@@ -135,6 +141,7 @@
 	  width: 10px;
       }
     </style>
+    <p>Click to select one or more entities. Press 'd' to delete selected entities.</p>
     <div id="ontology"></div>
     <script type="text/javascript">
       initOntology();
