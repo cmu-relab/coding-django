@@ -47,3 +47,37 @@ function insertEntity(parentDiv, childDiv) {
     return parentDiv.children[parentDiv.children.length - 1];
 }
 
+function toggleSelectableDiv(div, index) {
+    if (div.id != null && div.id.startsWith("text")) {
+	if (div.style.cursor == "default") {
+	    div.removeAttribute("onkeypress");
+	    div.removeAttribute("tabindex");
+	    div.removeAttribute("style");
+	}
+	else {
+	    div.setAttribute("onkeypress", "select_text(event, this)");
+	    div.setAttribute("tabindex", index);
+	    div.style.cursor = "default";
+	}
+    }
+}
+
+function toggleDraggableSpan(span) {
+    if (span.className.indexOf("coded_i") < 0) {
+	return;
+    }
+    else if (span.hasAttribute("draggable")) {
+	span.removeAttribute("ondragstart");
+	span.removeAttribute("ondrop");
+	span.removeAttribute("ondragover");
+	span.removeAttribute("draggable");
+	span.removeAttribute("onclick");
+    }
+    else {
+	span.setAttribute("ondragstart", "dragSpan(event)");
+	span.setAttribute("ondrop", "dropSpan(event)");
+	span.setAttribute("ondragover", "allowDropSpan(event)");
+	span.setAttribute("draggable", "true");
+	span.setAttribute("onclick", "selectSpan(this)");
+    }
+}

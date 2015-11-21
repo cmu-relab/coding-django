@@ -27,11 +27,15 @@ function dropSpan(ev) {
     ev.preventDefault();
     
     // find target div, create if none exists
-    var top = window.parent.document.getElementById("top");
+    var iframe = window.parent.document.getElementById("ontology_frame");
+    var if_doc = iframe.contentDocument || iframe.contentWindow.document;
+
+    var top = if_doc.getElementById("top");
     var targetName = ev.target.getAttribute("alt").split(",");
     var targetDiv = [];
+    
     for (var i=0; i<targetName.length; i++) {
-	targetDiv[i] = window.parent.document.getElementById(targetName[i]);
+	targetDiv[i] = if_doc.getElementById(targetName[i]);
 	if (targetDiv[i] == null) {
 	    targetDiv[i] = createEntity(targetName[i]);
 	    //console.log("Created target: ", targetName);
@@ -87,19 +91,13 @@ function selectSpan(span) {
 }
 
 function enableDraggableSpans() {
-    // iterate all relevant spans and make them drag and drop targets
-    var spans = document.getElementsByTagName("span");
-    //console.log("Spans found: ", spans.length);
+    // iterate all spans and make drag and drop targets
+    var span = document.getElementsByTagName("span");
     
-    for (var i=0; i <spans.length; i++) {
-	//console.log("Span: index ", i);
-	if (spans[i].className == "coded_i") {
-	    spans[i].setAttribute("id", "s" + i);
-	    spans[i].setAttribute("ondragstart", "dragSpan(event)");
-	    spans[i].setAttribute("ondrop", "dropSpan(event)");
-	    spans[i].setAttribute("ondragover", "allowDropSpan(event)");
-	    spans[i].setAttribute("draggable", "true");
-	    spans[i].setAttribute("onclick", "selectSpan(this)");
+    for (var i=0; i <span.length; i++) {
+	if (span[i].className.indexOf("coded_i") > -1) {
+	    span[i].setAttribute("id", "s" + i);
+	    toggleDraggableSpan(span[i]);
 	}
     }
 }

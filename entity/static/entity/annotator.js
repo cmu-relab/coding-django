@@ -1,16 +1,12 @@
 
-var queue = new Array();
+var queue = [];
 var spanCounter = 0;
 
 function enableSelectable() {
     // set the paragraphs to selectable
-    var pars = document.getElementsByTagName('div');
-    for (var i=0;i<pars.length; i++) {
-	if (pars[i].id != null && pars[i].id.startsWith("text")) {
-	    pars[i].setAttribute("onkeypress", "select_text(event, this)");
-	    pars[i].setAttribute("tabindex", i);
-            pars[i].style.cursor = "default";
-	}
+    var div = document.getElementsByTagName('div');
+    for (var i=0; i<div.length; i++) {
+	toggleSelectableDiv(div[i], i);
     }
 }
        
