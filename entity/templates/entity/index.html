@@ -101,34 +101,99 @@
 	      e.style.display = 'block';
 	  }
       }
-    </script>
+      function toggleFiltered(filter) {
+	  // find all the entity names in the ontology
+	  var iframe = document.getElementById("ontology_frame");
+	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
+
+	  var top = if_doc.getElementById("top");
+	  var entity = flattenOntology(top);
+
+	  // change the class names of the corresponding spans
+	  var aframe = document.getElementById("annotated_frame");
+	  var af_doc = aframe.contentDocument || aframe.contentWindow.document;
+
+	  var span = af_doc.getElementsByTagName("span");
+	  for (var i=0; i<span.length; i++) {
+	      if (span[i].className.indexOf("coded_i") < 0) {
+		  continue;
+	      }
+
+	      // for each span entity name, check for match in ontology
+	      var name = span[i].getAttribute("alt").split(",");
+	      for (var j=0; j<name.length; j++) {
+		  var found = false;
+		  for (var k=0; k<entity.length; k++) {
+		      if (name[j].localeCompare(entity[k]) == 0) {
+			  if (!filter) {
+			      span[i].className = span[i].className.replace("filtered ", "");
+			  }
+			  else {
+			      span[i].className = "filtered " + span[i].className;
+			  }
+			  found = true;
+			  break;
+		      }
+		  }
+		  if (found) {
+		      break;
+		  }
+	      }
+	  }
+      }
+
+      function flattenOntology(div) {
+	  var entity = [];
+	  for (var i=0; i<div.children.length; i++) {
+	      if (div.children[i].className == "branch") {
+		  continue;
+	      }
+	      else if (div.children[i].className == "label") {
+		  entity.push(div.children[i].innerHTML);
+	      }
+	      else {
+		  var next = flattenOntology(div.children[i]);
+		  entity = entity.concat(next);
+	      }
+	  }
+	  return entity;
+      }
+
+</script>
   </head>
   <body>
     <style type="text/css">
       body {
 	  font-size: 10pt;
       }
-      #annotated_frame {
-	  overflow: scroll;
+      #annotated_panel {
 	  width: 45%;
 	  height: 100%;
-	  border: 1px solid black;
 	  float: left;
+	  margin: 10px;
+      }
+      #annotated_frame {
+	  overflow: scroll;
+	  width: 100%;
+	  height: 100%;
+	  border: 1px solid black;
 	  padding: 10px;
-	  margin-right: 10px;
+
       }
       #ontology_frame {
 	  overflow: scroll;
 	  width: 45%;
 	  height: 100%;
 	  border: none;
-	  float: left;
+	  float: right;
+	  margin: 10px;
       }
       #settings_panel {
 	  border: 1px solid black;
-	  float: left;
 	  padding: 10px;
 	  width: 45%;
+	  float: right;
+	  margin: 10px;
       }
       #settings {
 	  display: none;
@@ -141,8 +206,13 @@
       }
     </style>
 
-    <p>Click to select one or more spans. Press 's' to add a new span, or 'd' to delete selected span(s).</p>
+    <div id="annotated_panel">
+      <p>Click to select one or more spans. Press 's' to add a new span, or 'd' to delete selected span(s).</p>
+      <form>
+	<input type="checkbox" onclick="toggleFiltered(this.checked)" /> Show annotations in the ontology.
+      </form>
     <iframe id="annotated_frame" name="annotated_frame" src="annotated?html={{html}}"></iframe>
+    </div>
 
     <div id="settings_panel">
       <a href="javascript:toggleVisible('settings')">Modify Settings</a>

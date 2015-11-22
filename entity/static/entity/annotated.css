@@ -10,12 +10,20 @@ span.coded_i.selected {
     background-color: #6699cc;
     padding: 4px;
 }
+span.coded_i.filtered {
+    background-color: #00ff00;
+    padding: 4px;
+}
 span.coded_i_new {
     background-color: #ff9999;
     padding: 4px;
 }
 span.coded_i_new.selected {
     background-color: #cc6666;
+    padding: 4px;
+}
+span.coded_i_new.filtered {
+    background-color: #00ff00;
     padding: 4px;
 }
 span {
