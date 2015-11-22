@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
-import csv, StringIO, os
+import csv, StringIO, os, re
 
 # Create your views here.
 
@@ -83,3 +83,39 @@ def download(request):
         response = HttpResponse(content, content_type='text/html')
         response['Content-Disposition'] = 'attachment; filename="annotated.html"'
     return response
+
+def save(request):
+    items = request.POST['ontology'].split(";")
+    annotated = request.POST['annotated']
+    userid = request.POST['userid']
+    filename = request.POST['filename']
+    
+    if not re.match('^[\w]+$', userid):
+        response = HttpResponse()
+        response.status_code = 500
+        response.reason_phrase = 'Username must be alphanumeric.'
+        return response
+
+    # set the project path, create dir if none exists
+    path = os.path.dirname(os.path.abspath(__file__)) + "/projects/" + userid
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # save the ontology
+    with open(path + "/" + filename + "_ontology.csv", 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        header = ["general", "specific"]
+        writer.writerow(header)
+
+        # write the file rows to the response
+        for item in items:
+            if len(item) == 0:
+                continue
+            row = item.split(",")
+            writer.writerow(row)
+
+    # save the annotated text
+    f = open(path + "/" + filename + "_annotated.html", 'w+')
+    f.write(annotated)
+    f.close()
+    return HttpResponse("OK")

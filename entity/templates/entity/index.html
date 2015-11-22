@@ -42,9 +42,14 @@
 	  }
       }
       function formatElementList() {
+	  var input = document.getElementById("ontology_input");
+	  input.value = createElementList();
+	  document.getElementById("download_ontology").submit();
+      }
+      function createElementList() {
 	  var iframe = document.getElementById("ontology_frame");
 	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
-	  var input = document.getElementById("ontology_input");
+
 	  var top = if_doc.getElementById("top");
 	  var value = "";
 	  for (var i=0; i<top.children.length; i++) {
@@ -52,8 +57,7 @@
 		  value += formatElement(top.children[i]);
 	      }
 	  }
-	  input.value = value;
-	  document.getElementById("download_ontology").submit();
+	  return value;
       }
       function formatElement(elem) {
 	  var value = "";
@@ -67,6 +71,10 @@
       }
       function formatAnnotated() {
 	  var input = document.getElementById("annotated_input");
+	  input.value = createAnnotated();
+	  document.getElementById("download_annotated").submit();
+      }
+      function createAnnotated() {
 	  var iframe = document.getElementById("annotated_frame");
 	  var iframe_doc = iframe.contentDocument
 	      || iframe.contentWindow.document;
@@ -82,15 +90,25 @@
 	  for (var i=0; i<span.length; i++) {
 	      toggleDraggableSpan(span[i]);
 	  }
+	  return content.innerHTML;
+      }
+      function startAutoSave() {
+	  var ont_input = document.getElementById("ontology_save");
+	  var ant_input = document.getElementById("annotated_save");
+	  var filename = document.getElementById("filename_save");
 	  
-	  input.value = content.innerHTML;
-	  document.getElementById("download_annotated").submit();
+	  ont_input.value = createElementList();
+	  ant_input.value = createAnnotated();
+	  document.getElementById("autosave_form").submit();
       }
       function setAnnotated() {
-	  select = document.getElementById("select_annotated");
-	  html = select.options[select.selectedIndex].value;
-	  iframe = document.getElementById("annotated_frame");
+	  var select = document.getElementById("select_annotated");
+	  var html = select.options[select.selectedIndex].value;
+	  var iframe = document.getElementById("annotated_frame");
 	  iframe.src = "annotated?html=" + html;
+	  
+	  var filename = document.getElementById("filename_save");
+	  filename.value = html;
       }
       function toggleVisible(id) {
 	  var e = document.getElementById(id);
@@ -141,7 +159,6 @@
 	      }
 	  }
       }
-
       function flattenOntology(div) {
 	  var entity = [];
 	  for (var i=0; i<div.children.length; i++) {
@@ -263,11 +280,27 @@
 	    </form>
 	  </td>
 	</tr>
+	<tr>
+	  <td class="header">Enable auto-save by saving once</td>
+	  <td>
+	</tr>
+	<tr>
+	  <td>
+	    <form id="autosave_form" action="save" method="POST" enctype="multipart/form-data" target="download_frame">
+	      {% csrf_token %}
+	      Enter your userid <input type="text" name="userid" size="12" />
+	      <input type="button" value="Save" onclick="startAutoSave()" />
+	      <input type="hidden" id="ontology_save" name="ontology" value="" />
+	      <input type="hidden" id="annotated_save" name="annotated" value="" />
+	      <input type="hidden" id="filename_save" name="filename" value="default" />
+	    </form>
+	  </td>
+	</tr>
       </table>
     </div>
 
     <iframe id="ontology_frame" name="ontology_frame" src="ontology"></iframe>
     
-    <iframe name="download_frame" style="display:none;"></iframe>
+    <iframe name="download_frame"></iframe>
   </body>
 </html>

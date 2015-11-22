@@ -5,7 +5,7 @@ lang/settings.py
 
 db.sqlite3
 
-entity/java/*
+entity/projects/*
 
 venv/*
 
