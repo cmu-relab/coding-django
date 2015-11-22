@@ -15,20 +15,23 @@
 	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
 
 	  var targetDiv = document.getElementById(ev.target.parentElement.id);
-	  var sourceId = ev.dataTransfer.getData("text");
+	  var sourceId = ev.dataTransfer.getData("text").split(",");
 	  var sourceDiv;
 
-	  if (sourceId.startsWith("!")) {
-	      sourceDiv = document.getElementById(sourceId.substring(1));
-	      insertEntity(targetDiv, sourceDiv);
-	  }
-	  else {
-
-	      var sourceSpan = if_doc.getElementById(sourceId);
-	      var names = sourceSpan.getAttribute("alt").split(",");
-	      for (var i=0; i<names.length; i++) {
-		  var sourceDiv = createEntity(names[i]);
+	  for (var i=0; i<sourceId.length; i++) {
+	      // if this is an onto2onto dnd event, just move the source
+	      if (sourceId[i].startsWith("!")) {
+		  sourceId[i] = sourceId[i].substring(1);
+		  sourceDiv = document.getElementById(sourceId[i]);
 		  insertEntity(targetDiv, sourceDiv);
+	      }
+	      else {		  
+		  var sourceSpan = if_doc.getElementById(sourceId[i]);
+		  var names = sourceSpan.getAttribute("alt").split(",");
+		  for (var j=0; j<names.length; j++) {
+		      var sourceDiv = createEntity(names[j]);
+		      insertEntity(targetDiv, sourceDiv);
+		  }
 	      }
 	  }
       }
