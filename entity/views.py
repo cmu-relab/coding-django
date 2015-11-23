@@ -15,6 +15,8 @@ def index(request):
     if 'userid' in request.POST:
         userid = request.POST['userid']
         userpath = path + "/projects/" + userid
+        if not os.path.exists(userpath):
+            os.makedirs(userpath)
 
         # if html, then create a new project from html
         if 'html' in request.POST:
