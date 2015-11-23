@@ -149,7 +149,7 @@
     <script type="text/javascript">
       initOntology();
       {% for lhs, rhs in items %}
-      initOntologyEntities('{{lhs}}', '{{rhs}}');
+      initOntologyEntities("{{lhs|safe}}", "{{rhs|safe}}");
       {% endfor %}
       </script>
   </body>

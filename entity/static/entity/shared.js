@@ -27,12 +27,18 @@ function createEntity(name) {
 
 function insertEntity(parentDiv, childDiv) {
     // find the insertion point, insert and return the entity
-    var i;
-    for (i=0; i<parentDiv.children.length; i++) {
+    for (var i=0; i<parentDiv.children.length; i++) {
         
-        // if the entity exists, return it without inserting duplicate
+        // if the entity exists, merge offspring, return existing entity
         if (parentDiv.children[i].id.localeCompare(childDiv.id) == 0) {
-            return parentDiv.children[i];
+	    
+	    var existing = parentDiv.children[i];
+	    for (var j=0; j<childDiv.children.length; j++) {
+		if (childDiv.children[j].className == "entity") {
+		    insertEntity(existing, childDiv.children[j]);
+		}
+	    }
+            return existing;
         }
         
         // else, insert the entity and return it

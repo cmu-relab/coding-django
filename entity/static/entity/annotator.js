@@ -2,14 +2,6 @@
 var queue = [];
 var spanCounter = 0;
 
-function enableSelectable() {
-    // set the paragraphs to selectable
-    var div = document.getElementsByTagName('div');
-    for (var i=0; i<div.length; i++) {
-	toggleSelectableDiv(div[i], i);
-    }
-}
-       
 function select_text(e, div) {
     // store the span text in the queue for undo
     var span;
@@ -276,4 +268,5 @@ function enableDraggableSpan(span) {
     span.setAttribute("ondragover", "allowDropSpan(event)");
     span.setAttribute("draggable", "true");
     span.setAttribute("onclick", "selectSpan(this)");
+    spanCounter++;
 }

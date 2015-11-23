@@ -90,14 +90,3 @@ function selectSpan(span) {
     }
 }
 
-function enableDraggableSpans() {
-    // iterate all spans and make drag and drop targets
-    var span = document.getElementsByTagName("span");
-    
-    for (var i=0; i <span.length; i++) {
-	if (span[i].className.indexOf("coded_i") > -1) {
-	    span[i].setAttribute("id", "s" + i);
-	    toggleDraggableSpan(span[i]);
-	}
-    }
-}

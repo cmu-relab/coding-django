@@ -4,47 +4,11 @@
     <meta charset="UTF-8">
     <script type='text/javascript' src='/static/entity/shared.js'></script>
     <script type='text/javascript'>
-      function allowDropOnto(ev) {
-	  ev.preventDefault();
-      }
-      function dragOnto(ev) {
-	  ev.dataTransfer.setData("text", "!" + ev.target.parentElement.id);
-	  //console.log("Dragging: ", ev.target.parentElement.id);
-      }
-      function dropOnto(ev) {
-	  ev.preventDefault();
-	  var targetDiv = document.getElementById(ev.target.parentElement.id);
-	  var sourceId = ev.dataTransfer.getData("text");
-	  var sourceDiv;
-	
-	  if (sourceId.startsWith("!")) {
-	      sourceDiv = document.getElementById(sourceId.substring(1));
-	      insertEntity(targetDiv, sourceDiv);
-	  }
-	  else {
-	      var iframe = document.getElementById("annotated_frame");
-	      var if_doc = iframe.contentDocument
-		  || iframe.contentWindow.document;
-	      var sourceSpan = if_doc.getElementById(sourceId);
-	      var names = sourceSpan.getAttribute("alt").split(",");
-	      for (var i=0; i<names.length; i++) {
-		  var sourceDiv = createEntity(names[i]);
-		  insertEntity(targetDiv, sourceDiv);
-	      }
-	  }
-      }
-      function selectEntity(div) {
-	  if (div.className.indexOf("selected ") < 0) {
-	      div.className = "selected " + div.className;
-	  }
-	  else {
-	      div.className = div.className.replace("selected ", "");
-	  }
-      }
-      function formatElementList() {
-	  var input = document.getElementById("ontology_input");
-	  input.value = createElementList();
-	  document.getElementById("download_ontology").submit();
+      var autoSaveHandle = null;
+
+      function downloadOntology() {
+	  saveProject();
+	  document.getElementById("dl_ontology").submit();
       }
       function createElementList() {
 	  var iframe = document.getElementById("ontology_frame");
@@ -52,6 +16,11 @@
 
 	  var top = if_doc.getElementById("top");
 	  var value = "";
+
+	  // top is null if no ontology is loaded
+	  if (top == null) {
+	      return value;
+	  }
 	  for (var i=0; i<top.children.length; i++) {
 	      if (top.children[i].className == "entity") {
 		  value += formatElement(top.children[i]);
@@ -70,9 +39,8 @@
 	  return value;
       }
       function formatAnnotated() {
-	  var input = document.getElementById("annotated_input");
-	  input.value = createAnnotated();
-	  document.getElementById("download_annotated").submit();
+	  saveProject();
+	  document.getElementById("dl_annotated").submit();
       }
       function createAnnotated() {
 	  var iframe = document.getElementById("annotated_frame");
@@ -80,7 +48,7 @@
 	      || iframe.contentWindow.document;
 
 	  // clean up the divs and spans
-	  var content = iframe_doc.body.cloneNode(true);
+	  var content = iframe_doc.cloneNode(true);
 
 	  var div = content.getElementsByTagName("div");
 	  for (var i=0; i<div.length; i++) {
@@ -92,30 +60,41 @@
 	  }
 	  return content.innerHTML;
       }
-      function startAutoSave() {
-	  var ont_input = document.getElementById("ontology_save");
-	  var ant_input = document.getElementById("annotated_save");
-	  var filename = document.getElementById("filename_save");
-	  
-	  ont_input.value = createElementList();
-	  ant_input.value = createAnnotated();
-	  document.getElementById("autosave_form").submit();
+      function autoSaveProject(checked) {
+	  if (checked) {
+	      autoSaveHandle = window.setInterval(function b() {
+		  saveProject(); }, 60000);
+	  }
+	  else {
+	      window.clearInterval(autoSaveHandle);
+	  }
       }
-      function setAnnotated() {
-	  var select = document.getElementById("select_annotated");
-	  var html = select.options[select.selectedIndex].value;
-	  var iframe = document.getElementById("annotated_frame");
-	  iframe.src = "annotated?html=" + html;
-	  
-	  var filename = document.getElementById("filename_save");
-	  filename.value = html;
+      function saveProject() {
+	  // save the annotated html
+	  var aframe = document.getElementById("annotated_frame");
+	  var af_doc = aframe.contentDocument || aframe.contentWindow.document;
+	  var ainput = document.getElementById("as_annotated_input");
+	  ainput.value = af_doc.documentElement.innerHTML;
+	  document.getElementById("autosave_annotated").submit();
+
+	  // save the ontoloy
+	  var oinput = document.getElementById("as_ontology_input");
+	  oinput.value = createElementList();
+	  document.getElementById("autosave_ontology").submit();
+
+	  // update the last saved time
+	  var d = new Date();
+	  var timestamp = d.getHours() + ":" + d.getMinutes() + ":"
+	      + d.getSeconds() + " " + (d.getMonth() + 1)
+	      + "/" + d.getDay() + "/" + d.getFullYear();
+	  document.getElementById("lastime_saved").innerHTML = ", last saved: " + timestamp;
       }
       function toggleVisible(id) {
 	  var e = document.getElementById(id);
 	  if (e.style.display == 'block') {
 	      e.style.display = 'none';
 	  }
-	  else{
+	  else {
 	      e.style.display = 'block';
 	  }
       }
@@ -175,6 +154,33 @@
 	  }
 	  return entity;
       }
+      function toggleDraggable(iframe) {
+	  var doc = iframe.contentDocument || iframe.contentWindow.document;
+
+	  // iterate all spans and make drag and drop targets
+	  var span = doc.getElementsByTagName("span");
+	  var spanCounter = span.length;
+
+	  for (var i=0; i <span.length; i++) {
+	      if (span[i].className.indexOf("coded_i") > -1) {
+		  if (span[i].getAttribute("id") == null) {
+		      span[i].setAttribute("id", "s" + spanCounter);
+		      spanCounter++;
+		  }
+		  toggleDraggableSpan(span[i]);
+	      }
+	  }
+      }
+      function toggleSelectable(iframe) {
+	  var doc = iframe.contentDocument || iframe.contentWindow.document;
+
+	  // set the paragraphs to selectable
+	  var div = doc.getElementsByTagName('div');
+	  for (var i=0; i<div.length; i++) {
+	      toggleSelectableDiv(div[i], i);
+	  }
+      }
+
 
 </script>
   </head>
@@ -213,9 +219,9 @@
 	  margin: 10px;
       }
       #settings {
-	  display: none;
 	  font-size: 10pt;
 	  margin-top: 10px;
+	  width: 100%;
       }
       #settings td.header {
 	  background-color: #ccccff;
@@ -224,41 +230,76 @@
     </style>
 
     <div id="annotated_panel">
+      <p><b>Viewing: {% if proj == "" %}None{% endif %}<span id="viewing_proj">{{proj}}</span>.</b>
       <p>Click to select one or more spans. Press 's' to add a new span, or 'd' to delete selected span(s).</p>
-      <form>
-	<input type="checkbox" onclick="toggleFiltered(this.checked)" /> Show annotations in the ontology.
-      </form>
-    <iframe id="annotated_frame" name="annotated_frame" src="annotated?html={{html}}"></iframe>
+    <iframe id="annotated_frame" name="annotated_frame" src="annotated?userid={{userid}}&proj={{proj}}" onload="toggleDraggable(this);toggleSelectable(this)"></iframe>
     </div>
 
     <div id="settings_panel">
-      <a href="javascript:toggleVisible('settings')">Modify Settings</a>
-      <table id="settings">
+      <a href="javascript:toggleVisible('settings')">View/Hide Settings</a>
+      <table id="settings" style="display:block;">
 	<tr>
-	  <td class="header">Options for the annotated text</td>
+	  <td class="header">Manage your current projects</td>
+	</tr>
+	<tr>
+	  <td>
+	    <form action="" method="POST">
+	      {% csrf_token %}
+	      Enter your userid: <input type="text" id="userid" name="userid" value="{{userid}}" />
+	      <input type="submit" value="Login" />
+	    </form>
+
+	    {% if userid != "" %}
+	    <form action="" method="POST" enctype="multipart/form-data">
+	      {% csrf_token %}
+	      <input type="hidden" name="userid" value="{{userid}}" />
+	      <select id="select_project" name="proj">
+		{% for project in projects %}
+		<option
+		   {% if project == proj %}selected="selected"{% endif %}>
+		   {{project}}</option>
+		{% endfor %}
+	      </select>
+	      <input type="submit" value="Open" />
+	    </form>
+
+	    <form action="" method="POST" enctype="multipart/form-data">
+	      {% csrf_token %}
+	      <input type="hidden" name="userid" value="{{userid}}" />
+	      <select id="select_html" name="html">
+		{% for html in project_html %}
+		<option>{{html}}</option>
+		{% endfor %}
+	      </select>
+	      <input type="submit" value="Create" />
+	    </form>
+
+	    <form>
+	      <input type="button" value="Save" onclick="saveProject()" />
+	      <input type="checkbox" onclick="autoSaveProject(this.checked)" /> Activate autosave<span id="lastime_saved"></span>
+	    </form>
+	    
+	  </td>
+	</tr>
+	<tr>
+	  <td class="header">Options for annotated text</td>
 	</tr>
 	<tr>
 	  <td>
 	    <form>
-	      <select id="select_annotated" name="html">
-		{% for file in files %}
-		<option>{{file}}</option>
-		{% endfor %}
-	      </select>
-	      <input type="button" value="Read" onclick="setAnnotated()" />
+	      <input type="checkbox" onclick="toggleFiltered(this.checked)" /> Show which annotations appear in the ontology
+	    </form>
+
+	    <form action="annotated?userid={{userid}}" method="POST" enctype="multipart/form-data" target="async_frame">
+	      {% csrf_token %}
+	      Import new HTML: <input type="file" name="html" />
+	      <input type="button" value="Upload" onclick="importAnnotated()" />
 	    </form>
 	    
-	    <form action="upload" method="POST" enctype="multipart/form-data" target="annotated_frame">
+	    <form id="dl_annotated" action="download?userid={{userid}}" method="POST" target="async_frame">
 	      {% csrf_token %}
-	      Import text: <input type="file" name="annotated" />
-	      <br />
-	      <input type="submit" value="Upload" />
-	    </form>
-	    
-            <form id="download_annotated" action="download" method="POST" target="download_frame">
-	      {% csrf_token %}
-	      Export text: <input type="button" value="Download" onclick="formatAnnotated()" />
-	      <input id="annotated_input" type="hidden" name="annotated" value="" />
+	      <input id="dl_annotated_file" type="hidden" name="proj" value="{{proj}}.html" />
+	      Export project HTML: <input type="button" value="Download" onclick="downloadAnnotated()" />
 	    </form>
 	  </td>
 	</tr>
@@ -267,40 +308,38 @@
 	</tr>
 	<tr>
 	  <td>
-	    <form action="upload" method="POST" enctype="multipart/form-data" target="ontology_frame">
+	    <form action="ontology?userid={{userid}}" method="POST" enctype="multipart/form-data" target="ontology_frame">
 	      {% csrf_token %}
-	      Import ontology: <input type="file" name="ontology" />
+	      <input id="ul_ontology_proj" type="hidden" name="proj" value="{{proj}}" />
+	      Import project ontology: <input type="file" name="ontology" />
 	      <input type="submit" value="Upload" />
 	    </form>
 	    
-	    <form id="download_ontology" action="download" method="POST" target="download_frame">
+	    <form id="dl_ontology" action="download?userid={{userid}}" method="POST" target="async_frame">
 	      {% csrf_token %}
-	      Export ontology: <input type="button" value="Download" onclick="formatElementList()" />
-	      <input id="ontology_input" type="hidden" name="ontology" value="" />
+	      <input id="dl_ontology_file" type="hidden" name="file" value="{{proj}}.csv" />
+	      Export project ontology: <input type="button" value="Download" onclick="downloadOntology()" />
 	    </form>
-	  </td>
-	</tr>
-	<tr>
-	  <td class="header">Enable auto-save by saving once</td>
-	  <td>
-	</tr>
-	<tr>
-	  <td>
-	    <form id="autosave_form" action="save" method="POST" enctype="multipart/form-data" target="download_frame">
-	      {% csrf_token %}
-	      Enter your userid <input type="text" name="userid" size="12" />
-	      <input type="button" value="Save" onclick="startAutoSave()" />
-	      <input type="hidden" id="ontology_save" name="ontology" value="" />
-	      <input type="hidden" id="annotated_save" name="annotated" value="" />
-	      <input type="hidden" id="filename_save" name="filename" value="default" />
-	    </form>
+	    {% endif %}
 	  </td>
 	</tr>
       </table>
     </div>
 
-    <iframe id="ontology_frame" name="ontology_frame" src="ontology"></iframe>
+    <iframe id="ontology_frame" name="ontology_frame" src="ontology?userid={{userid}}&proj={{proj}}"></iframe>
     
-    <iframe name="download_frame"></iframe>
+    <iframe name="async_frame" style="display:none"> </iframe>
+
+    <form id="autosave_annotated" action="annotated?userid={{userid}}" method="POST" enctype="multipart/form-data" target="async_frame">
+      {% csrf_token %}
+      <input type="hidden" name="proj" value="{{proj}}" />
+      <input id="as_annotated_input" type="hidden" name="annotated" value="" />
+    </form>
+
+    <form id="autosave_ontology" action="ontology?userid={{userid}}" method="POST" enctype="multipart/form-data" target="async_frame">
+      {% csrf_token %}
+      <input type="hidden" name="proj" value="{{proj}}" />
+      <input id="as_ontology_input" type="hidden" name="ontology" value="" />
+    </form>
   </body>
 </html>
