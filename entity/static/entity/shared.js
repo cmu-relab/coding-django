@@ -1,11 +1,13 @@
 
 /* Entity Library Functions, Travis Breaux, 6 NOV 2015 */
+entityIdCounter = 0;
 
 function createEntity(name) {
     // create the entity div
     var div = document.createElement("div");
-    div.id = name;
+    div.id = "e" + entityIdCounter;
     div.className = "entity";
+    entityIdCounter++;
     
     // create the branch icon
     var branch = document.createElement("div");

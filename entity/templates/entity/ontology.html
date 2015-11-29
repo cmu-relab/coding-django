@@ -14,32 +14,37 @@
 	  ev.preventDefault();
       }
       function dragOnto(ev) {
-	  ev.dataTransfer.setData("text", "!" + ev.target.parentElement.id);
-	  //console.log("Dragging: ", ev.target.parentElement.id);
+	  var div = getSelectedEntities();
+	  if (div.length == 0) {
+	      return;
+	  }
+	  // compile list of source ids to drag
+	  var sourceId = "";
+	  var selected = false;
+	  for (var i=0; i<div.length; i++) {
+	      sourceId += "," + div[i].parentElement.id;
+	      if (ev.target.parentElement.id == div[i].parentElement.id) {
+		  selected = true;
+	      }
+	  }
+	  if (selected) {
+	      ev.dataTransfer.setData("text", sourceId.substring(1));
+	  }
+	  else {
+	      ev.dataTransfer.setData("text", ev.target.parentElement.id);
+	  }
       }
       function dropOnto(ev) {
 	  ev.preventDefault();
-	  var iframe = window.parent.document.getElementById("annotated_frame");
-	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
-
 	  var targetDiv = document.getElementById(ev.target.parentElement.id);
 	  var sourceId = ev.dataTransfer.getData("text").split(",");
 	  var sourceDiv;
 
 	  for (var i=0; i<sourceId.length; i++) {
 	      // if this is an onto2onto dnd event, just move the source
-	      if (sourceId[i].startsWith("!")) {
-		  sourceId[i] = sourceId[i].substring(1);
+	      if (sourceId[i].startsWith("e")) {
 		  sourceDiv = document.getElementById(sourceId[i]);
 		  insertEntity(targetDiv, sourceDiv);
-	      }
-	      else {		  
-		  var sourceSpan = if_doc.getElementById(sourceId[i]);
-		  var names = sourceSpan.getAttribute("alt").split(",");
-		  for (var j=0; j<names.length; j++) {
-		      var sourceDiv = createEntity(names[j]);
-		      insertEntity(targetDiv, sourceDiv);
-		  }
 	      }
 	  }
       }
