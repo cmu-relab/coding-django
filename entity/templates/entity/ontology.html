@@ -96,6 +96,9 @@
 	  }
 	  else if (key == 'n') {
 	      var div = getSelectedEntities();
+	      if (div.length != 1) {
+		  return;
+	      }
 	      for (var i=0; i< div.length; i++) {
 		  var e = createEntity("new entity " + newEntityCounter);
 		  newEntityCounter++;
@@ -149,24 +152,20 @@
 	  if (!e.shiftKey) {
 	      var selected = getSelectedEntities();
 	      clearSelected();
-	      
-	      for (var i=0; i<selected.length; i++) {
-		  if (selected[i] == div) {
-		      if (div.innerHTML == "top") {
-			  continue;
-		      }
-		      
-		      // setup the editing text box and value
-		      editingDiv = div;
-		      editingValue = div.innerHTML;
-		      editingText.value = editingValue;
 
-		      // replace the div with the text
-		      var parentDiv = div.parentElement;
-		      parentDiv.removeChild(editingDiv);
-		      parentDiv.appendChild(editingText);
-		      editingText.focus();
-		  }
+	      if (selected.length == 1 && selected[0] == div
+		  && div.innerHTML != "top") {
+
+		  // setup the editing text box and value
+		  editingDiv = div;
+		  editingValue = div.innerHTML;
+		  editingText.value = editingValue;
+
+		  // replace the div with the text
+		  var parentDiv = div.parentElement;
+		  parentDiv.removeChild(editingDiv);
+		  parentDiv.appendChild(editingText);
+		  editingText.focus();
 	      }
 
 	      div.className = "selected " + div.className;
