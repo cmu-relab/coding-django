@@ -3,6 +3,12 @@
     <script type='text/javascript' src='/static/entity/shared.js'></script>
     <script type='text/javascript'>
       var newEntityCounter = 1;
+      var editingDiv = null;
+      var editingValue = null;
+      var editingText = document.createElement("input");
+      editingText.setAttribute("type", "text");
+      editingText.setAttribute("onkeypress", "modifyEntity(event, this)");
+      editingText.setAttribute("onblur", "cancelModifyEntity(event, this)");
 
       function allowDropOnto(ev) {
 	  ev.preventDefault();
@@ -115,9 +121,54 @@
 	      div[i].className = div[i].className.replace("selected ", "");
 	  }
       }
+      function modifyEntity(e, text) {
+	  // on keypress for RETURN / ENTER
+	  if (e.keyCode == 13) {
+	      // set the div text to the input text, reset input
+	      editingDiv.innerHTML = text.value;
+
+	      // replace the text with the div
+	      var parentDiv = editingText.parentElement;
+	      parentDiv.removeChild(editingText);
+	      parentDiv.appendChild(editingDiv);
+	  }
+	  // on keypress for ESC
+	  else if (e.keyCode == 27) {
+	      cancelModifyEntity(e, text);
+	  }
+      }
+      function cancelModifyEntity(e, text) {
+	      editingDiv.innerHTML = editingValue;
+	      
+	      // replace the text with the div
+	      var parentDiv = editingText.parentElement;
+	      parentDiv.removeChild(editingText);
+	      parentDiv.appendChild(editingDiv);
+      }
       function selectEntity(e, div) {
 	  if (!e.shiftKey) {
+	      var selected = getSelectedEntities();
 	      clearSelected();
+	      
+	      for (var i=0; i<selected.length; i++) {
+		  if (selected[i] == div) {
+		      if (div.innerHTML == "top") {
+			  continue;
+		      }
+		      
+		      // setup the editing text box and value
+		      editingDiv = div;
+		      editingValue = div.innerHTML;
+		      editingText.value = editingValue;
+
+		      // replace the div with the text
+		      var parentDiv = div.parentElement;
+		      parentDiv.removeChild(editingDiv);
+		      parentDiv.appendChild(editingText);
+		      editingText.focus();
+		  }
+	      }
+
 	      div.className = "selected " + div.className;
 	  }
 	  else {
