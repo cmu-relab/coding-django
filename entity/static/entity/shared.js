@@ -19,7 +19,7 @@ function createEntity(name) {
     label.setAttribute("ondragover", "allowDropOnto(event)");
     label.setAttribute("draggable", "true");
     label.setAttribute("class", "label");
-    label.setAttribute("onclick", "selectEntity(this)");
+    label.setAttribute("onclick", "selectEntity(event, this)");
     label.appendChild(document.createTextNode(name));
     div.appendChild(label);
     return div;

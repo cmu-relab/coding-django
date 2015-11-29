@@ -5,6 +5,9 @@ import csv, StringIO, os, re, shutil
 
 # Create your views here.
 
+def editor(request):
+    return render(request, 'entity/editor.html')
+
 def index(request):
     path = os.path.dirname(os.path.abspath(__file__))
     

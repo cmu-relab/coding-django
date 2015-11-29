@@ -2,6 +2,8 @@
   <head>
     <script type='text/javascript' src='/static/entity/shared.js'></script>
     <script type='text/javascript'>
+      var newEntityCounter = 1;
+
       function allowDropOnto(ev) {
 	  ev.preventDefault();
       }
@@ -75,29 +77,56 @@
 	  var unicode = obj.charCode ? obj.charCode : obj.keyCode;
 	  var key = String.fromCharCode(unicode).toLowerCase();
 
-	  if (key != 'd') {
-	      return;
-	  }
-
 	  // delete selected entities
+	  if (key == 'd') {
+	      var div = getSelectedEntities();
+	      for (var i=0; i< div.length; i++) {
+		  if (div[i].innerHTML == "top") {
+		      continue;
+		  }
+		  var container = div[i].parentElement;
+		  container.parentElement.removeChild(container);
+	      }
+	  }
+	  else if (key == 'n') {
+	      var div = getSelectedEntities();
+	      for (var i=0; i< div.length; i++) {
+		  var e = createEntity("new entity " + newEntityCounter);
+		  newEntityCounter++;
+		  insertEntity(div[i].parentElement, e);
+	      }
+	  }
+      }
+      function getSelectedEntities() {
+	  var onto = document.getElementById("ontology");
 	  var div = onto.getElementsByTagName("div");
+	  var selected = []
 	  for (var i=0; i<div.length; i++) {
 	      if (div[i].className.indexOf("selected ") < 0) {
 		  continue;
 	      }
-	      if (div[i].innerHTML == "top") {
-		  continue;
-	      }
-	      var container = div[i].parentElement;
-	      container.parentElement.removeChild(container);
+	      selected.push(div[i])
+	  }
+	  return selected;
+      }
+      function clearSelected() {
+	  var div = getSelectedEntities();
+	  for (var i=0; i<div.length; i++) {
+	      div[i].className = div[i].className.replace("selected ", "");
 	  }
       }
-      function selectEntity(div) {
-	  if (div.className.indexOf("selected ") < 0) {
+      function selectEntity(e, div) {
+	  if (!e.shiftKey) {
+	      clearSelected();
 	      div.className = "selected " + div.className;
 	  }
 	  else {
-	      div.className = div.className.replace("selected ", "");
+	      if (div.className.indexOf("selected ") < 0) {
+		  div.className = "selected " + div.className;
+	      }
+	      else {
+		  div.className = div.className.replace("selected ", "");
+	      }
 	  }
       }
     </script>
