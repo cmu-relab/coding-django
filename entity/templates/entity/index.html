@@ -14,25 +14,21 @@
 	  var iframe = document.getElementById("ontology_frame");
 	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
 
-	  var top = if_doc.getElementById("top");
+	  var top = if_doc.getElementById("e0");
 	  var value = "";
 
 	  // top is null if no ontology is loaded
 	  if (top == null) {
 	      return value;
 	  }
-	  for (var i=0; i<top.children.length; i++) {
-	      if (top.children[i].className == "entity") {
-		  value += formatElement(top.children[i]);
-	      }
-	  }
+	  value = formatElement(top);
 	  return value;
       }
       function formatElement(elem) {
 	  var value = "";
 	  for (var i=0; i<elem.children.length; i++) {
 	      if (elem.children[i].className == "entity") {
-		  value += elem.id + "," + elem.children[i].id + ";";
+		  value += elem.id + "," + elem.children[1].innerHTML + "," +  elem.children[i].id + "," + elem.children[i].children[1].innerHTML + ";";
 		  value += formatElement(elem.children[i]);
 	      }
 	  }
@@ -74,9 +70,15 @@
 	  var aframe = document.getElementById("annotated_frame");
 	  var af_doc = aframe.contentDocument || aframe.contentWindow.document;
 	  var ainput = document.getElementById("as_annotated_input");
+
+	  // disable draggable and selectable while saving
+	  toggleDraggable(aframe);
+	  toggleSelectable(aframe);
 	  ainput.value = af_doc.documentElement.innerHTML;
 	  document.getElementById("autosave_annotated").submit();
-
+	  toggleDraggable(aframe);
+	  toggleSelectable(aframe);
+	  
 	  // save the ontoloy
 	  var oinput = document.getElementById("as_ontology_input");
 	  oinput.value = createElementList();

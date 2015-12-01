@@ -18,64 +18,65 @@
 	  if (div.length == 0) {
 	      return;
 	  }
-	  // compile list of source ids to drag
-	  var sourceId = "";
+	  // compile list of source id and names to drag
+	  var list = [];
 	  var selected = false;
 	  for (var i=0; i<div.length; i++) {
-	      sourceId += "," + div[i].parentElement.id;
-	      if (ev.target.parentElement.id == div[i].parentElement.id) {
-		  selected = true;
-	      }
+	      var id = div[i].parentElement.id
+	      var name = div[i].innerHTML;
+	      list.push(id + ":" + name);
+
+	      // check if the target id is also selected
+	      selected = selected || ev.target.parentElement.id == id;
 	  }
-	  if (selected) {
-	      ev.dataTransfer.setData("text", sourceId.substring(1));
+	  // if target not selected, only move the target
+	  if (!selected) {
+	      var div = ev.target;
+	      list = [div.parentElement.id + ":" + div.innerHTML];
 	  }
-	  else {
-	      ev.dataTransfer.setData("text", ev.target.parentElement.id);
-	  }
+	  ev.dataTransfer.setData("text", list.join());
       }
       function dropOnto(ev) {
 	  ev.preventDefault();
-	  var targetDiv = document.getElementById(ev.target.parentElement.id);
-	  var sourceId = ev.dataTransfer.getData("text").split(",");
+	  var source = ev.dataTransfer.getData("text").split(",");
 	  var sourceDiv;
-
-	  for (var i=0; i<sourceId.length; i++) {
+	  var targetDiv = ev.target.parentElement;
+	  //console.log("Dropping " + source + " onto " + targetDiv.id);
+	  
+	  for (var i=0; i<source.length; i++) {
 	      // if this is an onto2onto dnd event, just move the source
-	      if (sourceId[i].startsWith("e")) {
-		  sourceDiv = document.getElementById(sourceId[i]);
+	      var id_name = source[i].split(":");
+	      if (id_name[0].startsWith("e")) {
+		  sourceDiv = document.getElementById(id_name[0]);
+		  insertEntity(targetDiv, sourceDiv);
+	      }
+	      // else, create a new entity for the source
+	      else {
+		  sourceDiv = createNewEntity(id_name[1]);
 		  insertEntity(targetDiv, sourceDiv);
 	      }
 	  }
       }
       function initOntology() {
 	  var div = document.getElementById("ontology");
-	  var entity = createEntity("top");
-	  insertEntity(div, entity);
+	  var entity = createEntity("e0", "top");
+	  div.appendChild(entity);
 
 	  // activate key listener
 	  div.setAttribute("onkeypress", "modifyOntology(event,this)");
 	  div.setAttribute("tabindex", 1);
 	  div.style.cursor = "default";
       }
-      function initOntologyEntities(lhs, rhs) {
+      function initOntologyEntities(lid, lhs, rid, rhs) {
 	  // begin by finding the existing entities
-	  var lhsDiv, rhsDiv;
-	  if (lhs != null && lhs != "") {
-	      lhsDiv = document.getElementById(lhs);
-
-	      // if no lhsDiv, then add to top
-	      if (lhsDiv == null) {
-		  var top = document.getElementById("top");
-		  lhsDiv = createEntity(lhs);
-		  insertEntity(top, lhsDiv);
-	      }
+	  var lhsDiv = document.getElementById(lid);
+	  if (lhsDiv == null) {
+	      console.log("cannot find div: ", lid, lhs);
 	  }
-	  if (rhs != null && rhs != "") {
-	      rhsDiv = document.getElementById(rhs);
-	      if (rhsDiv == null) {
-		  rhsDiv = createEntity(rhs);
-	      }
+
+	  var rhsDiv = document.getElementById(rid);
+	  if (rhsDiv == null) {
+	      rhsDiv = createEntity(rid, rhs);
 	  }
 
 	  if (lhsDiv != null && rhsDiv != null) {
@@ -105,7 +106,7 @@
 		  return;
 	      }
 	      for (var i=0; i< div.length; i++) {
-		  var e = createEntity("new entity " + newEntityCounter);
+		  var e = createNewEntity("new entity " + newEntityCounter);
 		  newEntityCounter++;
 		  insertEntity(div[i].parentElement, e);
 	      }
@@ -171,6 +172,19 @@
 		  parentDiv.removeChild(editingDiv);
 		  parentDiv.appendChild(editingText);
 		  editingText.focus();
+
+		  // set caret position to end
+		  var pos = editingText.value.length;
+		  if (editingText.setSelectionRange) {
+		      editingText.setSelectionRange(pos, pos);
+		  }
+		  else if (editingText.createTextRange) {
+		      var range = editingText.createTextRange();
+		      range.collapse(true);
+		      range.moveEnd('character', pos);
+		      range.moveStart('character', pos);
+		      range.select();
+		  }
 	      }
 
 	      div.className = "selected " + div.className;
@@ -228,12 +242,12 @@
 	  width: 10px;
       }
     </style>
-    <p>Click to select one or more entities. Press 'd' to delete selected entities.</p>
+    <p>Commands: Press 'n' to creae a new entity, Press 'd' to delete selected entities.</p>
     <div id="ontology"></div>
     <script type="text/javascript">
       initOntology();
-      {% for lhs, rhs in items %}
-      initOntologyEntities("{{lhs|safe}}", "{{rhs|safe}}");
+      {% for lid, lhs, rid, rhs in items %}
+      initOntologyEntities("{{lid|safe}}", "{{lhs|safe}}", "{{rid|safe}}", "{{rhs|safe}}");
       {% endfor %}
       </script>
   </body>

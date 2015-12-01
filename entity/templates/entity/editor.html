@@ -7,31 +7,29 @@
       var autoSaveHandle = null;
 
       function downloadOntology() {
+	  var input = document.getElementById("dl_ontology_input");
+	  input.value = createElementList();
 	  document.getElementById("dl_ontology").submit();
       }
       function createElementList() {
 	  var iframe = document.getElementById("ontology_frame");
 	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
 
-	  var top = if_doc.getElementById("top");
+	  var top = if_doc.getElementById("e0");
 	  var value = "";
 
 	  // top is null if no ontology is loaded
 	  if (top == null) {
 	      return value;
 	  }
-	  for (var i=0; i<top.children.length; i++) {
-	      if (top.children[i].className == "entity") {
-		  value += formatElement(top.children[i]);
-	      }
-	  }
+	  value = formatElement(top);
 	  return value;
       }
       function formatElement(elem) {
 	  var value = "";
 	  for (var i=0; i<elem.children.length; i++) {
 	      if (elem.children[i].className == "entity") {
-		  value += elem.id + "," + elem.children[i].id + ";";
+		  value += elem.id + "," + elem.children[1].innerHTML + "," + elem.children[i].id + ","+ elem.children[i].children[1].innerHTML + ";";
 		  value += formatElement(elem.children[i]);
 	      }
 	  }
@@ -109,6 +107,7 @@
 	    </form>
 	    
 	    <form id="dl_ontology" action="download" method="POST" target="async_frame">
+	      {% csrf_token %}
 	      <input id="dl_ontology_input" type="hidden" name="ontology" value="" />
 	      Export project ontology: <input type="button" value="Download" onclick="downloadOntology()" />
 	    </form>
@@ -119,6 +118,6 @@
 
     <iframe id="ontology_frame" name="ontology_frame" src="ontology"></iframe>
     
-    <iframe name="async_frame" style="display:none"> </iframe>
+    <iframe name="async_frame" style="display:block"> </iframe>
   </body>
 </html>
