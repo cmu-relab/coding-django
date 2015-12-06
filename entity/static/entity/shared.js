@@ -1,15 +1,24 @@
 
 /* Entity Library Functions, Travis Breaux, 6 NOV 2015 */
+var entityCounter = 1;
 
-function createEntity(name) {
+function createNewEntity(name) {
+    var id = "e" + entityCounter;
+    return createEntity(id, name);
+}
+
+function createEntity(id, name) {
     // create the entity div
     var div = document.createElement("div");
-    div.id = name;
+    div.id = id;
     div.className = "entity";
+
+    // increase the entity counter
+    entityCounter++;
     
     // create the branch icon
     var branch = document.createElement("div");
-    branch.setAttribute("class", "branch");
+    branch.setAttribute("class", "branch rel_s");
     div.appendChild(branch);
     
     // label the div with the entity name
@@ -19,18 +28,24 @@ function createEntity(name) {
     label.setAttribute("ondragover", "allowDropOnto(event)");
     label.setAttribute("draggable", "true");
     label.setAttribute("class", "label");
-    label.setAttribute("onclick", "selectEntity(this)");
+    label.setAttribute("onclick", "selectEntity(event, this)");
     label.appendChild(document.createTextNode(name));
     div.appendChild(label);
     return div;
 }
 
 function insertEntity(parentDiv, childDiv) {
+    var childName = childDiv.children[1].innerHTML;
+    
     // find the insertion point, insert and return the entity
     for (var i=0; i<parentDiv.children.length; i++) {
-        
+	if (parentDiv.children[i].className != "entity") {
+	    continue;
+	}
+	
+        var siblingName = parentDiv.children[i].children[1].innerHTML;
         // if the entity exists, merge offspring, return existing entity
-        if (parentDiv.children[i].id.localeCompare(childDiv.id) == 0) {
+        if (siblingName.localeCompare(childName) == 0) {
 	    
 	    var existing = parentDiv.children[i];
 	    for (var j=0; j<childDiv.children.length; j++) {
@@ -42,7 +57,7 @@ function insertEntity(parentDiv, childDiv) {
         }
         
         // else, insert the entity and return it
-        else if (parentDiv.children[i].id.localeCompare(childDiv.id) > 0) {
+        else if (siblingName.localeCompare(childName) > 0) {
             parentDiv.insertBefore(childDiv, parentDiv.children[i]);
             return parentDiv.children[i];
         }
@@ -66,6 +81,22 @@ function toggleSelectableDiv(div, index) {
 	    div.style.cursor = "default";
 	}
     }
+}
+
+function getEntitiesByName(name) {
+    var iframe = window.parent.document.getElementById("ontology_frame");
+    var if_doc = iframe.contentDocument || iframe.contentWindow.document;
+
+    var div = if_doc.getElementsByTagName("div");
+    var entities = [];
+    for (var i=0; i<div.length; i++) {
+	if (div[i].className == "entity") {
+	    if (div[i].children[1].innerHTML.localeCompare(name) == 0) {
+		entities.push(div[i]);
+	    }
+	}
+    }
+    return entities;
 }
 
 function toggleDraggableSpan(span) {

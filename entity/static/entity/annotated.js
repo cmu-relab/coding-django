@@ -11,13 +11,13 @@ function dragSpan(ev) {
     var spans = document.getElementsByTagName("span");
     for (var i=0; i<spans.length; i++) {
 	if (spans[i].className.indexOf("selected ") >= 0) {
-	    list.push(spans[i].getAttribute("id"));
+	    list.push(spans[i].id + ":" + spans[i].innerHTML);
 	}
     }
     
     // if no selected spans, drag the target span by default
     if (list.length == 0) {
-	list.push(ev.target.getAttribute("id"));
+	list.push(ev.target.id + ":" + ev.target.innerHTML);
     }
     //console.log("Dragging: ", list);
     ev.dataTransfer.setData("text", list.join());
@@ -30,53 +30,51 @@ function dropSpan(ev) {
     var iframe = window.parent.document.getElementById("ontology_frame");
     var if_doc = iframe.contentDocument || iframe.contentWindow.document;
 
-    var top = if_doc.getElementById("top");
+    var top = if_doc.getElementById("e0");
     var targetName = ev.target.getAttribute("alt").split(",");
     var targetDiv = [];
-    
+
     for (var i=0; i<targetName.length; i++) {
-	targetDiv[i] = if_doc.getElementById(targetName[i]);
-	if (targetDiv[i] == null) {
-	    targetDiv[i] = createEntity(targetName[i]);
-	    //console.log("Created target: ", targetName);
-	    insertEntity(top, targetDiv[i]);
+	var div = getEntitiesByName(targetName[i]);
+
+	// if target does not exist, create and add to top
+	if (div.length == 0) {
+	    div = [createNewEntity(targetName[i])];
+	    //console.log("Created target: ", div[0].id + " " + targetName[i]);
+	    insertEntity(top, div[0]);
 	}
+	else {
+	    //console.log("Found target: ", div + " " + targetName[i]);
+	}
+	targetDiv = targetDiv.concat(div);
     }
     
     // find source divs or create, if none exists
-    var sourceId = ev.dataTransfer.getData("text").split(",");
+    var source = ev.dataTransfer.getData("text").split(",");
     var sourceName = [];
-    for (var i=0; i<sourceId.length; i++) {
-	var sourceDiv = document.getElementById(sourceId[i]);
-	var names = sourceDiv.getAttribute("alt").split(",");
+    for (var i=0; i<source.length; i++) {
+	var id_name = source[i].split(":");
+	var sourceSpan = document.getElementById(id_name[0]);
+	var names = sourceSpan.getAttribute("alt").split(",");
+	
 	for (var j=0; j<names.length; j++) {
 	    sourceName.push(names[j]);
 	}
 
 	// deselect the source span, if selected
-	var sourceSpan = document.getElementById(sourceId[i]);
 	sourceSpan.className = sourceSpan.className.replace("selected ", "");
     }
     for (var i=0; i<sourceName.length; i++) {
-	
-	for (var j=0; j<targetName.length; j++) {
-	    if (targetName[j] == sourceName[i]) {
+	for (var j=0; j<targetDiv.length; j++) {
+	    var targetName = targetDiv[j].children[1].innerHTML;
+	    if (targetName.localeCompare(sourceName[i]) == 0) {
 		continue;
 	    }
-	    var sourceDiv = createEntity(sourceName[i]);
+	    var sourceDiv = createNewEntity(sourceName[i]);
 	    //console.log("Created source: ", sourceName[i]);
 
 	    insertEntity(targetDiv[j], sourceDiv);
-	    //console.log("Linked source to target: ", targetName[j]);
-	}
-	
-	// remove source div from top-level, if exists
-	for (var j=0; j<top.children; j++) {
-	    var id = top.children[i].id;
-	    if (id.localeCompare(sourceName[i]) == 0) {
-		top.removeChild(ontology.children[i]);
-		break;
-	    }
+	    //console.log("Linked source to target: ", targetName);
 	}
     }
 }

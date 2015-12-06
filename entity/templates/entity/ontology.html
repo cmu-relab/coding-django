@@ -2,67 +2,81 @@
   <head>
     <script type='text/javascript' src='/static/entity/shared.js'></script>
     <script type='text/javascript'>
+      var newEntityCounter = 1;
+      var editingDiv = null;
+      var editingValue = null;
+      var editingText = document.createElement("input");
+      editingText.setAttribute("type", "text");
+      editingText.setAttribute("onkeypress", "modifyEntity(event, this)");
+      editingText.setAttribute("onblur", "cancelModifyEntity(event, this)");
+
       function allowDropOnto(ev) {
 	  ev.preventDefault();
       }
       function dragOnto(ev) {
-	  ev.dataTransfer.setData("text", "!" + ev.target.parentElement.id);
-	  //console.log("Dragging: ", ev.target.parentElement.id);
+	  var div = getSelectedEntities();
+	  if (div.length == 0) {
+	      return;
+	  }
+	  // compile list of source id and names to drag
+	  var list = [];
+	  var selected = false;
+	  for (var i=0; i<div.length; i++) {
+	      var id = div[i].parentElement.id
+	      var name = div[i].innerHTML;
+	      list.push(id + ":" + name);
+
+	      // check if the target id is also selected
+	      selected = selected || ev.target.parentElement.id == id;
+	  }
+	  // if target not selected, only move the target
+	  if (!selected) {
+	      var div = ev.target;
+	      list = [div.parentElement.id + ":" + div.innerHTML];
+	  }
+	  ev.dataTransfer.setData("text", list.join());
       }
       function dropOnto(ev) {
 	  ev.preventDefault();
-	  var iframe = window.parent.document.getElementById("annotated_frame");
-	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
-
-	  var targetDiv = document.getElementById(ev.target.parentElement.id);
-	  var sourceId = ev.dataTransfer.getData("text").split(",");
+	  var source = ev.dataTransfer.getData("text").split(",");
 	  var sourceDiv;
-
-	  for (var i=0; i<sourceId.length; i++) {
+	  var targetDiv = ev.target.parentElement;
+	  //console.log("Dropping " + source + " onto " + targetDiv.id);
+	  
+	  for (var i=0; i<source.length; i++) {
 	      // if this is an onto2onto dnd event, just move the source
-	      if (sourceId[i].startsWith("!")) {
-		  sourceId[i] = sourceId[i].substring(1);
-		  sourceDiv = document.getElementById(sourceId[i]);
+	      var id_name = source[i].split(":");
+	      if (id_name[0].startsWith("e")) {
+		  sourceDiv = document.getElementById(id_name[0]);
 		  insertEntity(targetDiv, sourceDiv);
 	      }
-	      else {		  
-		  var sourceSpan = if_doc.getElementById(sourceId[i]);
-		  var names = sourceSpan.getAttribute("alt").split(",");
-		  for (var j=0; j<names.length; j++) {
-		      var sourceDiv = createEntity(names[j]);
-		      insertEntity(targetDiv, sourceDiv);
-		  }
+	      // else, create a new entity for the source
+	      else {
+		  sourceDiv = createNewEntity(id_name[1]);
+		  insertEntity(targetDiv, sourceDiv);
 	      }
 	  }
       }
       function initOntology() {
 	  var div = document.getElementById("ontology");
-	  var entity = createEntity("top");
-	  insertEntity(div, entity);
+	  var entity = createEntity("e0", "top");
+	  div.appendChild(entity);
 
 	  // activate key listener
 	  div.setAttribute("onkeypress", "modifyOntology(event,this)");
 	  div.setAttribute("tabindex", 1);
 	  div.style.cursor = "default";
       }
-      function initOntologyEntities(lhs, rhs) {
+      function initOntologyEntities(lid, lhs, rid, rhs) {
 	  // begin by finding the existing entities
-	  var lhsDiv, rhsDiv;
-	  if (lhs != null && lhs != "") {
-	      lhsDiv = document.getElementById(lhs);
-
-	      // if no lhsDiv, then add to top
-	      if (lhsDiv == null) {
-		  var top = document.getElementById("top");
-		  lhsDiv = createEntity(lhs);
-		  insertEntity(top, lhsDiv);
-	      }
+	  var lhsDiv = document.getElementById(lid);
+	  if (lhsDiv == null) {
+	      console.log("cannot find div: ", lid, lhs);
 	  }
-	  if (rhs != null && rhs != "") {
-	      rhsDiv = document.getElementById(rhs);
-	      if (rhsDiv == null) {
-		  rhsDiv = createEntity(rhs);
-	      }
+
+	  var rhsDiv = document.getElementById(rid);
+	  if (rhsDiv == null) {
+	      rhsDiv = createEntity(rid, rhs);
 	  }
 
 	  if (lhsDiv != null && rhsDiv != null) {
@@ -75,29 +89,128 @@
 	  var unicode = obj.charCode ? obj.charCode : obj.keyCode;
 	  var key = String.fromCharCode(unicode).toLowerCase();
 
-	  if (key != 'd') {
-	      return;
-	  }
-
 	  // delete selected entities
+	  if (key == 'd') {
+	      var div = getSelectedEntities();
+	      for (var i=0; i< div.length; i++) {
+		  if (div[i].innerHTML == "top") {
+		      continue;
+		  }
+		  var container = div[i].parentElement;
+		  container.parentElement.removeChild(container);
+	      }
+	  }
+	  // create a new entity
+	  else if (key == 'n') {
+	      var div = getSelectedEntities();
+	      if (div.length != 1) {
+		  return;
+	      }
+	      for (var i=0; i< div.length; i++) {
+		  var e = createNewEntity("new entity " + newEntityCounter);
+		  newEntityCounter++;
+		  insertEntity(div[i].parentElement, e);
+	      }
+	  }
+	  // relabel the relation type
+	  else if (key == 's' || key == 'e' || key == 'p') {
+	      var div = getSelectedEntities();
+	      if (div.length != 1) {
+		  return;
+	      }
+	      for (var i=0; i< div.length; i++) {
+		  if (div[i].parentElement.id == 'e0') {
+		      continue;
+		  }
+		  var branch = div[i].parentElement.children[0];
+		  branch.className = "branch rel_" + key;
+	      }
+	  }
+      }
+      function getSelectedEntities() {
+	  var onto = document.getElementById("ontology");
 	  var div = onto.getElementsByTagName("div");
+	  var selected = []
 	  for (var i=0; i<div.length; i++) {
 	      if (div[i].className.indexOf("selected ") < 0) {
 		  continue;
 	      }
-	      if (div[i].innerHTML == "top") {
-		  continue;
-	      }
-	      var container = div[i].parentElement;
-	      container.parentElement.removeChild(container);
+	      selected.push(div[i])
+	  }
+	  return selected;
+      }
+      function clearSelected() {
+	  var div = getSelectedEntities();
+	  for (var i=0; i<div.length; i++) {
+	      div[i].className = div[i].className.replace("selected ", "");
 	  }
       }
-      function selectEntity(div) {
-	  if (div.className.indexOf("selected ") < 0) {
+      function modifyEntity(e, text) {
+	  // on keypress for RETURN / ENTER
+	  if (e.keyCode == 13) {
+	      // set the div text to the input text, reset input
+	      editingDiv.innerHTML = text.value;
+
+	      // replace the text with the div
+	      var parentDiv = editingText.parentElement;
+	      parentDiv.removeChild(editingText);
+	      parentDiv.appendChild(editingDiv);
+	  }
+	  // on keypress for ESC
+	  else if (e.keyCode == 27) {
+	      cancelModifyEntity(e, text);
+	  }
+      }
+      function cancelModifyEntity(e, text) {
+	      editingDiv.innerHTML = editingValue;
+	      
+	      // replace the text with the div
+	      var parentDiv = editingText.parentElement;
+	      parentDiv.removeChild(editingText);
+	      parentDiv.appendChild(editingDiv);
+      }
+      function selectEntity(e, div) {
+	  if (!e.shiftKey) {
+	      var selected = getSelectedEntities();
+	      clearSelected();
+
+	      if (selected.length == 1 && selected[0] == div
+		  && div.innerHTML != "top") {
+
+		  // setup the editing text box and value
+		  editingDiv = div;
+		  editingValue = div.innerHTML;
+		  editingText.value = editingValue;
+
+		  // replace the div with the text
+		  var parentDiv = div.parentElement;
+		  parentDiv.removeChild(editingDiv);
+		  parentDiv.appendChild(editingText);
+		  editingText.focus();
+
+		  // set caret position to end
+		  var pos = editingText.value.length;
+		  if (editingText.setSelectionRange) {
+		      editingText.setSelectionRange(pos, pos);
+		  }
+		  else if (editingText.createTextRange) {
+		      var range = editingText.createTextRange();
+		      range.collapse(true);
+		      range.moveEnd('character', pos);
+		      range.moveStart('character', pos);
+		      range.select();
+		  }
+	      }
+
 	      div.className = "selected " + div.className;
 	  }
 	  else {
-	      div.className = div.className.replace("selected ", "");
+	      if (div.className.indexOf("selected ") < 0) {
+		  div.className = "selected " + div.className;
+	      }
+	      else {
+		  div.className = div.className.replace("selected ", "");
+	      }
 	  }
       }
     </script>
@@ -136,20 +249,32 @@
 	  background-color: #ff99ff;
       }
       div.branch {
-	  border-left: solid black 1px;
-	  border-bottom: solid black 1px;
 	  margin-right: 5px;
 	  float: left;
 	  height: 9px;
 	  width: 10px;
       }
+      div.branch.rel_s {
+	  border-left: solid black 1px;
+	  border-bottom: solid black 1px;
+      }
+      div.branch.rel_e {
+	  border-left: double black 2px;
+	  border-bottom: double black 2px;
+
+      }
+      div.branch.rel_p {
+	  border-left: dotted black 1px;
+	  border-bottom: dotted black 1px;
+      }
+
     </style>
-    <p>Click to select one or more entities. Press 'd' to delete selected entities.</p>
+    <p>Commands: Press 'n' to creae a new entity, Press 'd' to delete selected entities.</p>
     <div id="ontology"></div>
     <script type="text/javascript">
       initOntology();
-      {% for lhs, rhs in items %}
-      initOntologyEntities("{{lhs|safe}}", "{{rhs|safe}}");
+      {% for lid, lhs, rid, rhs in items %}
+      initOntologyEntities("{{lid|safe}}", "{{lhs|safe}}", "{{rid|safe}}", "{{rhs|safe}}");
       {% endfor %}
       </script>
   </body>

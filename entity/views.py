@@ -5,6 +5,9 @@ import csv, StringIO, os, re, shutil
 
 # Create your views here.
 
+def editor(request):
+    return render(request, 'entity/editor.html')
+
 def index(request):
     path = os.path.dirname(os.path.abspath(__file__))
     
@@ -105,12 +108,23 @@ def annotated(request):
     return render(request, 'entity/annotated.html')    
 
 def ontology(request):
-    path = os.path.dirname(os.path.abspath(__file__))
     items = []
+
+    # read the posted ontology file, if any
+    if 'ontology' in request.FILES:
+        content = request.FILES['ontology'].read()
+        dialect = csv.Sniffer().sniff(content)
+        stream = StringIO.StringIO(content)
+        reader = csv.reader(stream, delimiter=',', dialect=dialect)
+        
+        # skip the header row, first
+        reader.next()
+        for row in reader:
+            items.append(row)
 
     # if userid, then set path to user's project folder
     if not 'userid' in request.GET:
-        return render(request, 'entity/ontology.html', {'items': []});
+        return render(request, 'entity/ontology.html', {'items': items});
     
     userid = request.GET['userid']
 
@@ -122,24 +136,14 @@ def ontology(request):
         return response
 
     # define the user's project path
-    path = path + "/projects/" + userid + "/"
+    path = os.path.dirname(os.path.abspath(__file__)) + "/projects/" + userid + "/"
 
     # store the posted ontology file, if any
     if 'ontology' in request.FILES:
         content = request.FILES['ontology'].read()
-        csvfile = request.POST['proj'] + ".csv"
 
         with open(path + csvfile, 'w+') as csvf:
             csvf.write(content)
-            
-        dialect = csv.Sniffer().sniff(content)
-        stream = StringIO.StringIO(content)
-        reader = csv.reader(stream, delimiter=',', dialect=dialect)
-        
-        # skip the header row, first
-        reader.next()
-        for row in reader:
-            items.append(row)
 
     # check if this is a request to load the file
     elif 'proj' in request.GET and request.GET['proj'] != "":
@@ -166,7 +170,7 @@ def ontology(request):
         
         with open(path + csvfile, 'w+') as csvf:
             writer = csv.writer(csvf)
-            header = ["general", "specific"]
+            header = ["gid", "general", "sid", "specific"]
             writer.writerow(header)
 
             # write the file rows to the response
@@ -180,21 +184,37 @@ def ontology(request):
     return render(request, 'entity/ontology.html', {'items': items});
     
 def download(request):
-    path = os.path.dirname(os.path.abspath(__file__))
-    userid = request.GET['userid']
-    userpath = path + "/projects/" + userid + "/"
-    filename = request.POST['file']
+    if 'file' in request.POST:
+        path = os.path.dirname(os.path.abspath(__file__))
+        userid = request.GET['userid']
+        userpath = path + "/projects/" + userid + "/"
+        filename = request.POST['file']
 
-    # create the response header for the file download
-    f = open(userpath + filename, 'r')
-    content = f.read()
-    f.close()
-    response = HttpResponse(content)
+        # create the response header for the file download
+        f = open(userpath + filename, 'r')
+        content = f.read()
+        f.close()
+        response = HttpResponse(content)
 
-    response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
-    if filename.endswith(".csv"):
-        response.content_type = 'text/csv';
+        response['Content-Disposition'] = 'attachment; filename="' + filename + '"'
+        if filename.endswith(".csv"):
+            response.content_type = 'text/csv';
+        else:
+            response.content_type = 'text/html';
+        return response
     else:
-        response.content_type = 'text/html';
-    return response
+        items = request.POST['ontology'].split(";")
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="ontology.csv"'
 
+        writer = csv.writer(response)
+        header = ["gid", "general", "sid", "specific", "relation"]
+        writer.writerow(header)
+        
+        # write the file rows to the response
+        for item in items:
+            if len(item) == 0:
+                continue
+            row = item.split(",")
+            writer.writerow(row)
+        return response

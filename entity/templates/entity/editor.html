@@ -1,0 +1,126 @@
+<html>
+  <head>
+    <title>Classify entities into ontology</title>
+    <meta charset="UTF-8">
+    <script type='text/javascript' src='/static/entity/shared.js'></script>
+    <script type='text/javascript'>
+      var autoSaveHandle = null;
+
+      function downloadOntology() {
+	  var input = document.getElementById("dl_ontology_input");
+	  input.value = createElementList();
+	  document.getElementById("dl_ontology").submit();
+      }
+      function createElementList() {
+	  var iframe = document.getElementById("ontology_frame");
+	  var if_doc = iframe.contentDocument || iframe.contentWindow.document;
+
+	  var top = if_doc.getElementById("e0");
+	  var value = "";
+
+	  // top is null if no ontology is loaded
+	  if (top == null) {
+	      return value;
+	  }
+	  value = formatElement(top);
+	  return value;
+      }
+      function formatElement(elem) {
+	  var value = "";
+	  for (var i=2; i<elem.children.length; i++) {
+	      var label = elem.children[1];
+	      if (elem.children[i].className == "entity") {
+		  var ch_rel = elem.children[i].children[0].className.split(" ")[1];
+		  var ch_label = elem.children[i].children[1];
+		  value += elem.id + "," + label.innerHTML + "," + elem.children[i].id + ","+ ch_label.innerHTML + "," + ch_rel + ";";
+		  value += formatElement(elem.children[i]);
+	      }
+	  }
+	  return value;
+      }
+      function toggleVisible(id) {
+	  var e = document.getElementById(id);
+	  if (e.style.display == 'block') {
+	      e.style.display = 'none';
+	  }
+	  else {
+	      e.style.display = 'block';
+	  }
+      }
+      function flattenOntology(div) {
+	  var entity = [];
+	  for (var i=0; i<div.children.length; i++) {
+	      if (div.children[i].className == "branch") {
+		  continue;
+	      }
+	      else if (div.children[i].className == "label") {
+		  entity.push(div.children[i].innerHTML);
+	      }
+	      else {
+		  var next = flattenOntology(div.children[i]);
+		  entity = entity.concat(next);
+	      }
+	  }
+	  return entity;
+      }
+
+</script>
+  </head>
+  <body>
+    <style type="text/css">
+      body {
+	  font-size: 10pt;
+      }
+      #ontology_frame {
+	  overflow: scroll;
+	  width: 45%;
+	  height: 100%;
+	  border: none;
+	  float: right;
+	  margin: 10px;
+      }
+      #settings_panel {
+	  border: 1px solid black;
+	  padding: 10px;
+	  width: 45%;
+	  float: right;
+	  margin: 10px;
+      }
+      #settings {
+	  font-size: 10pt;
+	  margin-top: 10px;
+	  width: 100%;
+      }
+      #settings td.header {
+	  background-color: #ccccff;
+	  padding: 5px;
+      }
+    </style>
+
+    <div id="settings_panel">
+      <table id="settings">
+	  <td class="header">Options for the ontology</td>
+	</tr>
+	<tr>
+	  <td>
+	    <form action="ontology" method="POST" enctype="multipart/form-data" target="ontology_frame">
+	      {% csrf_token %}
+	      Import project ontology: <input type="file" name="ontology" />
+	      <input type="submit" value="Upload" />
+	    </form>
+	    
+	    <form id="dl_ontology" action="download" method="POST" target="async_frame">
+	      {% csrf_token %}
+	      <input id="dl_ontology_input" type="hidden" name="ontology" value="" />
+	      Export project ontology: <input type="button" value="Download" onclick="downloadOntology()" />
+	    </form>
+	  </td>
+	</tr>
+      </table>
+    </div>
+
+    <iframe id="ontology_frame" name="ontology_frame" src="ontology"></iframe>
+    
+    <iframe name="async_frame" style="display:block"> </iframe>
+  </body>
+</html>
