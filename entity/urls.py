@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^ontology$', views.ontology),
     url(r'^download$', views.download),
     url(r'^editor$', views.editor),
+    url(r'^classify$', views.classify),
 ]

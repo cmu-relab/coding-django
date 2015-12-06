@@ -8,6 +8,14 @@ import csv, StringIO, os, re, shutil
 def editor(request):
     return render(request, 'entity/editor.html')
 
+def classify(request):
+    items = ['example1', 'example2', 'example3']
+    if 'term_file' in request.FILES:
+        content = request.FILES['term_file'].read()
+        items = content.split("\n")
+
+    return render(request, 'entity/classify.html', {'items': items})
+
 def index(request):
     path = os.path.dirname(os.path.abspath(__file__))
     
