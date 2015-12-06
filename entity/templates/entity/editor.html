@@ -27,9 +27,12 @@
       }
       function formatElement(elem) {
 	  var value = "";
-	  for (var i=0; i<elem.children.length; i++) {
+	  for (var i=2; i<elem.children.length; i++) {
+	      var label = elem.children[1];
 	      if (elem.children[i].className == "entity") {
-		  value += elem.id + "," + elem.children[1].innerHTML + "," + elem.children[i].id + ","+ elem.children[i].children[1].innerHTML + ";";
+		  var ch_rel = elem.children[i].children[0].className.split(" ")[1];
+		  var ch_label = elem.children[i].children[1];
+		  value += elem.id + "," + label.innerHTML + "," + elem.children[i].id + ","+ ch_label.innerHTML + "," + ch_rel + ";";
 		  value += formatElement(elem.children[i]);
 	      }
 	  }

@@ -100,6 +100,7 @@
 		  container.parentElement.removeChild(container);
 	      }
 	  }
+	  // create a new entity
 	  else if (key == 'n') {
 	      var div = getSelectedEntities();
 	      if (div.length != 1) {
@@ -109,6 +110,20 @@
 		  var e = createNewEntity("new entity " + newEntityCounter);
 		  newEntityCounter++;
 		  insertEntity(div[i].parentElement, e);
+	      }
+	  }
+	  // relabel the relation type
+	  else if (key == 's' || key == 'e' || key == 'p') {
+	      var div = getSelectedEntities();
+	      if (div.length != 1) {
+		  return;
+	      }
+	      for (var i=0; i< div.length; i++) {
+		  if (div[i].parentElement.id == 'e0') {
+		      continue;
+		  }
+		  var branch = div[i].parentElement.children[0];
+		  branch.className = "branch rel_" + key;
 	      }
 	  }
       }
@@ -234,13 +249,25 @@
 	  background-color: #ff99ff;
       }
       div.branch {
-	  border-left: solid black 1px;
-	  border-bottom: solid black 1px;
 	  margin-right: 5px;
 	  float: left;
 	  height: 9px;
 	  width: 10px;
       }
+      div.branch.rel_s {
+	  border-left: solid black 1px;
+	  border-bottom: solid black 1px;
+      }
+      div.branch.rel_e {
+	  border-left: double black 2px;
+	  border-bottom: double black 2px;
+
+      }
+      div.branch.rel_p {
+	  border-left: dotted black 1px;
+	  border-bottom: dotted black 1px;
+      }
+
     </style>
     <p>Commands: Press 'n' to creae a new entity, Press 'd' to delete selected entities.</p>
     <div id="ontology"></div>

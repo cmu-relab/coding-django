@@ -208,7 +208,7 @@ def download(request):
         response['Content-Disposition'] = 'attachment; filename="ontology.csv"'
 
         writer = csv.writer(response)
-        header = ["gid", "general", "sid", "specific"]
+        header = ["gid", "general", "sid", "specific", "relation"]
         writer.writerow(header)
         
         # write the file rows to the response

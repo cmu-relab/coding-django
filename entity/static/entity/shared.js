@@ -18,7 +18,7 @@ function createEntity(id, name) {
     
     // create the branch icon
     var branch = document.createElement("div");
-    branch.setAttribute("class", "branch");
+    branch.setAttribute("class", "branch rel_s");
     div.appendChild(branch);
     
     // label the div with the entity name
