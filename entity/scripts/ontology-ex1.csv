@@ -1,0 +1,7 @@
+gid,general,sid,specific,relation
+e0,top,e2,new entity 1,rel_s
+e2,new entity 1,e3,new entity 2,rel_p
+e2,new entity 1,e7,new entity 6,rel_s
+e0,top,e4,new entity 3,rel_e
+e0,top,e5,new entity 4,rel_e
+e0,top,e6,new entity 5,rel_s
