@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
-import csv, StringIO, os, re, shutil
+import csv, StringIO, os, re, shutil, io
 
 # Create your views here.
 
@@ -120,9 +120,11 @@ def ontology(request):
 
     # read the posted ontology file, if any
     if 'ontology' in request.FILES:
+
         content = request.FILES['ontology'].read()
         dialect = csv.Sniffer().sniff(content)
-        stream = StringIO.StringIO(content)
+        stream = io.StringIO(unicode(content), newline=None)
+        #stream = StringIO.StringIO(content)
         reader = csv.reader(stream, delimiter=',', dialect=dialect)
         
         # skip the header row, first
