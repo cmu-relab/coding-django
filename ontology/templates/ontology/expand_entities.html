@@ -1,0 +1,12 @@
+{% load entity_tags %}
+{% for entity in entities %}
+<div class="entity">
+  <div class="branch">&nbsp;</div>
+  <span id="{{entity_path}}.{{entity.name}}" class="{% if entity.has_subclasses %} expandable{% endif %}" onclick="expand(this)">{{entity.name}}</span>
+  <div class="subclasses">
+    {% if entity.has_subclasses %}
+    {% expand_entities entity.get_subclasses entity_path entity.name %}
+    {% endif %}
+  </div>
+</div>
+{% endfor %}

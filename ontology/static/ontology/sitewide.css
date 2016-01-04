@@ -1,0 +1,27 @@
+
+ul li { padding: 5px 0px; }
+dd { padding: 5px 0px; }
+dt { padding: 5px 0px; }
+
+p {
+    font-family: helvetica;
+    font-size: 14px;
+}
+
+table {
+    font-family: helvetica;
+    font-size: 14px;
+}
+
+table.panel {
+    border: 1px solid black;
+    
+}
+table.panel td {
+    padding: 5px;
+    background-color: #cccccc;
+}
+table.panel td.heading {
+    background-color: #666666;
+    color: #ffffff;
+}

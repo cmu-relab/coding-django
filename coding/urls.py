@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.contrib import admin
 
 urlpatterns = [
     # Examples:
@@ -7,4 +8,6 @@ urlpatterns = [
 
     url(r'^kappa/', include('kappa.urls')),
     url(r'^entity/', include('entity.urls')),
+    url(r'^ontology/', include('ontology.urls')),
+    url(r'^admin/', include(admin.site.urls)),
 ]

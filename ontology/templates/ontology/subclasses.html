@@ -1,0 +1,26 @@
+{% load entity_tags %}
+<table>
+{% for entity in entities %}
+  <tr>
+    <td>
+      <select name="{{entity.name}}">
+	<option></option>
+	<option>isSubclassOf</option>
+	<option>isPartOf</option>
+	<option>isSynonymOf</option>
+	<option>hasSubclass</option>
+	<option>hasPart</option>
+      </select>
+      
+      <a href="javascript:expand_entity('{{id}}.{{entity.name}}')">{{entity.name}}</a>
+	
+      <table id="{{id}}.{{entity.name}}" style="display:none">
+	<tr>
+	  <td>{% show_entities entity.get_subclasses id entity.name %}
+	  </td>
+	</tr>
+      </table>
+    </td>
+  </tr>
+{% endfor %}
+</table>

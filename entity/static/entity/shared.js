@@ -7,7 +7,9 @@ function createNewEntity(name) {
     return createEntity(id, name);
 }
 
-function createEntity(id, name) {
+function createEntity(id, name, rel) {
+    rel = typeof rel != 'undefined' ? rel : "rel_s";
+    
     // create the entity div
     var div = document.createElement("div");
     div.id = id;
@@ -18,7 +20,7 @@ function createEntity(id, name) {
     
     // create the branch icon
     var branch = document.createElement("div");
-    branch.setAttribute("class", "branch rel_s");
+    branch.setAttribute("class", "branch " + rel);
     div.appendChild(branch);
     
     // label the div with the entity name

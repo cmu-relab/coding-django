@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'kappa',
     'entity',
+    'ontology',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -1,0 +1,34 @@
+{% load entity_tags %}
+{% load staticfiles %}
+<html>
+  <head>
+    <title>Display the ontology</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{% static "ontology/sitewide.css" %}" />
+    <script type="text/javascript">
+      function expand_entity(id) {
+	  var table = document.getElementById(id);
+	  if (table.style.display == "none") {
+	      table.style.display = "block";
+	  }
+	  else {
+	      table.style.display = "none";
+	  }
+	  console.log(id)
+      }
+    </script>
+  </head>
+  <body>
+    <p align="center" style="font-size: 14px">
+      Click on linked entities below to expand their subclasses.
+      <br />(<a href="/ontology">Go Back</a>)
+    </p>
+    <table align="center" style="border: 1px solid black;" width="600">
+      <tr>
+	<td>
+	  {% expand_entities entities '' 'top' %}
+	</td>
+      </tr>
+    </table>
+  </body>
+</html>

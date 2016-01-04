@@ -67,7 +67,7 @@
 	  div.setAttribute("tabindex", 1);
 	  div.style.cursor = "default";
       }
-      function initOntologyEntities(lid, lhs, rid, rhs) {
+      function initOntologyEntities(lid, lhs, rid, rhs, rel) {
 	  // begin by finding the existing entities
 	  var lhsDiv = document.getElementById(lid);
 	  if (lhsDiv == null) {
@@ -76,7 +76,7 @@
 
 	  var rhsDiv = document.getElementById(rid);
 	  if (rhsDiv == null) {
-	      rhsDiv = createEntity(rid, rhs);
+	      rhsDiv = createEntity(rid, rhs, rel);
 	  }
 
 	  if (lhsDiv != null && rhsDiv != null) {
@@ -273,8 +273,8 @@
     <div id="ontology"></div>
     <script type="text/javascript">
       initOntology();
-      {% for lid, lhs, rid, rhs in items %}
-      initOntologyEntities("{{lid|safe}}", "{{lhs|safe}}", "{{rid|safe}}", "{{rhs|safe}}");
+      {% for lid, lhs, rid, rhs, rel in items %}
+      initOntologyEntities("{{lid|safe}}", "{{lhs|safe}}", "{{rid|safe}}", "{{rhs|safe}}", "{{rel|safe}}");
       {% endfor %}
       </script>
   </body>

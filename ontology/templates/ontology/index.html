@@ -1,0 +1,80 @@
+{% load staticfiles %}
+<html>
+  <head>
+    <title>Choose the ontology</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{% static "ontology/sitewide.css" %}" />
+  </head>
+  <body>
+    <p align="center">Classify new entities into an ontology</p>
+    <form action="classify" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+    <table align="center" class="panel" width="400">
+      <tr>
+	<td align="right" class="heading" width="150">Select ontology:</td>
+	<td><select name="selected">
+	    {% for ontology in ontologies %}
+	    <option>{{ontology.owner}}</option>
+	    {% endfor %}
+	  </select>
+	</td>
+      </tr>
+      <tr>
+	<td align="right" class="heading">Create new ontology:</td>
+	<td><input type="textbox" name="new_owner" size="32" />
+	</td>
+      </tr>
+      <tr>
+	<td align="right" class="heading">Upload new entities:</td>
+	<td><input type="file" name="entity_file" />
+	</td>
+      </tr>
+      <tr>
+	<td align="right" colspan="2">
+	  <input type="submit" value="Load" />	  
+	</td>
+      </tr>
+    </table>
+    </form>
+
+    <p align="center">Upload a new ontology as an OWL file</p>
+    <form action="load_ontology" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+    <table align="center" class="panel" width="400">
+      <tr>
+	<td align="right" class="heading" width="150">Upload new ontology:</td>
+	<td><input type="textbox" name="new_owner" size="32" /><br />
+	  <input type="file" name="ontology" />
+	</td>
+      </tr>
+      <tr>
+	<td align="right" colspan="2">
+	  <input type="submit" value="Load" />
+	</td>
+      </tr>
+    </table>
+    </form>
+
+    <p align="center">View an existing ontology</p>
+  <form action="show" method="post">
+      {% csrf_token %}
+    <table align="center" class="panel" width="400">
+      <tr>
+	<td align="right" class="heading" width="150">Select ontology:</td>
+	<td><select name="selected">
+	    {% for ontology in ontologies %}
+	    <option>{{ontology.owner}}</option>
+	    {% endfor %}
+	  </select>
+	</td>
+      </tr>
+      <tr>
+	<td align="right" colspan="2">
+	  <input type="submit" value="Show" />	  
+	</td>
+      </tr>
+    </table>
+    </form>
+
+  </body>
+</html>

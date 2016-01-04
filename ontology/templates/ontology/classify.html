@@ -1,0 +1,191 @@
+{% load entity_tags %}
+{% load staticfiles %}
+<html>
+  <head>
+    <title>Classify your entity</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{% static "ontology/sitewide.css" %}" />
+    <style>
+      div#relates_to {
+	  position: absolute;
+	  border: 1px solid black;
+	  background-color: #99ccff;
+	  padding: 10px;
+	  height: 100px;
+	  width: 500px;
+	  top: 50%;
+	  left: 50%;
+	  margin-top: -50px;
+	  margin-left: -250px;
+      }
+      div.entity {
+	  margin-left: 15px;
+	  padding: 2px;
+      }
+      div.branch {
+	  border-left: 1px solid black;
+	  border-bottom: 1px solid black;
+	  float: left;
+	  font-size: 7px;
+	  height: 10px;
+	  width: 10px;;
+      }
+      div.entity span {
+	  cursor: pointer;
+	  padding: 5px;
+      }
+      div.entity span.expandable {
+          font-weight: bold;
+	  color: #0000cc;
+      }
+      div.subclasses {
+	  display: none;
+	  padding: 3px;
+      }
+    </style>
+    <script type="text/javascript">
+      function expand(obj) {
+	  while (obj.className != "subclasses") {
+	      obj = obj.nextSibling;
+	  }
+	  if (obj.style.display == "block") {
+	      obj.style.display = "none";
+	  }
+	  else {
+	      obj.style.display = "block";
+	  }
+      }
+      function enableDraggable(obj) {
+	  for (var i=0; i<obj.children.length; i++) {
+	      if (obj.children[i].className != "entity") {
+		  continue;
+	      }
+	      var entity = obj.children[i];
+	      for (var j = 0; j<entity.children.length; j++) {
+		  if (entity.children[j].nodeName == "SPAN") {
+		      var span = entity.children[j];
+		      span.setAttribute("ondragstart", "drag(event)");
+		      span.setAttribute("ondrop", "drop(event)");
+		      span.setAttribute("ondragover", "allowDrop(event)");
+		      span.setAttribute("draggable", "true");
+		  }
+		  else if (entity.children[j].className == "subclasses") {
+		      enableDraggable(entity.children[j]);
+		  }
+	      }
+	  }
+      }
+      function allowDrop(e) {
+	  e.preventDefault();
+      }
+      function drag(e) {
+	  e.dataTransfer.setData("text", e.target.id);
+      }
+      function drop(e) {
+	  e.preventDefault();
+	  var source_id = e.dataTransfer.getData("text");
+	  var source = document.getElementById(source_id);
+	  var target = e.target;
+
+	  var div = document.getElementById("relates_to");
+	  document.getElementById("from_entity").innerHTML = source.innerHTML;
+	  document.getElementById("from_entity_id").value = source.id;
+	  document.getElementById("to_entity").innerHTML = target.innerHTML;
+	  document.getElementById("to_entity_id").innerHTML = target.id;
+	  div.style.display = "block";
+      }
+      function approve() {
+	  var div = document.getElementById("relates_to");
+	  div.style.display = "none";
+
+	  var source_id = document.getElementById("from_entity_id");
+	  var source = document.getElementById(source_id);
+	  var target_id = document.getElementById("to_entity_id");
+	  var target = document.getElementById(target_id);
+
+	  // copy the contents of the source.parentNode
+	  var div = source.parentNode
+	  
+	  // re-code the id to match the new path
+	  // set the new parent to expandable, if it is not already
+	 
+      }
+      function cancel() {
+	  var div = document.getElementById("relates_to");
+	  div.style.display = "none";
+      }
+    </script>
+  </head>
+  <body>
+    <form action="classify" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="ontology" value="{{ontology.owner}}" />
+      <input type="hidden" name="entity_name" value="{{entity.name}}" />
+    <table align="center" class="panel" width="600">
+      <tr>
+	<td align="right" class="heading" width="150">New Entity:</td>
+	<td><span style="cursor: pointer; font-weight: bold;" id="{{entity.name}}" draggable="true" ondragstart="drag(event)">{{entity.name}}</span></td>
+      </tr>
+      <tr>
+	<td align="right" class="heading">Is Plural Form?</td>
+	<td>
+	  <input type="checkbox" name="plural"> If checked, enter singular form:
+	  <input type="text" name="singular" value="{{entity.name}}" size="32" />
+	</td>
+      </tr>
+      <tr>
+	<td align="right" class="heading" valign="top">Existing Entities:</td>
+	<td>
+	  <div id=".top" class="entity">
+	    <span class="entity">top</span>
+	    <div id="classes_top" class="subclasses" style="display: block">
+	      {% expand_entities basics '' 'top' %}
+	    </div>
+	  </div>
+	</td>
+      </tr>
+      <tr>
+	<td align="right" colspan="2">
+	  <input type="submit" value="Save" />
+	</td>
+      </tr>
+    </table>
+    </form>
+
+    <script type="text/javascript">
+      var div = document.getElementById("classes_top");
+      enableDraggable(div);
+    </script>
+
+    <div id="relates_to" style="display:none">
+      <table height="100%" width="100%">
+	<tr>
+	  <td>
+	    <span id="from_entity"></span>
+	    <input type="hidden" id="from_entity_id" value="" />
+	    <select id="relation">
+	      <option></option>
+	      <option value="H">isSubclassOf (H)</option>
+	      <option value="A">isSubclassOf (A)</option>
+	      <option value="M">isPartOf (M)</option>
+	      <option value="S">isSynonymOf (S)</option>
+	      <option value="E">isSynonymOf (E)</option>
+	      <option value="T">isSynonymOf (T)</option>
+	      <option value="_H">hasSubclass (H)</option>
+	      <option value="_A">hasSubclass (A)</option>
+	      <option value="_M">hasPart (M)</option>
+	    </select>
+	    <span id="to_entity"></span>
+	    <input type="hidden" id="to_entity_id" value="" />
+	  </td>
+	</tr>
+	<tr>
+	  <td align="right" height="100%" valign="bottom">
+	    <input type="button" value="Accept" onclick="approve()" />
+	    <input type="button" value="Cancel" onclick="cancel()" />
+	  </td>
+	</tr>
+      </table>
+    </div>    
+  </body>
+</html>
